@@ -1,0 +1,6 @@
+locale                   : "en-US"
+title                    : "lmao"
+description              : &description "i do things sometimes probably"
+url                      : https://thecatontheceiling.github.io
+baseurl                  : ""
+repository               : "thecatontheceiling/thecatontheceiling.github.io"
