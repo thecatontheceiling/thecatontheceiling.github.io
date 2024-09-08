@@ -3,4 +3,3 @@ title                    : "lmao"
 description              : "i do things sometimes probably"
 baseurl                  : https://thecatontheceiling.github.io
 repository               : "thecatontheceiling/thecatontheceiling.github.io"
-theme                    : jekyll-theme-hacker # sorry but this is the only theme that looks "good enough" lmao
