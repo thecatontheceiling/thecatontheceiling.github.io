@@ -15,4 +15,5 @@ description: Installation guides, download links, and changelog for the HITMAN 3
 **https://zerofs.link/f/BjPSUFT**
 :::
 
-#### Join to get support + pings for new updates: [https://discord.gg/tKb56Nhpxq](https://discord.gg/tKb56Nhpxq)
+Join to get support + pings for new updates: 
+* [https://discord.gg/tKb56Nhpxq](https://discord.gg/tKb56Nhpxq)

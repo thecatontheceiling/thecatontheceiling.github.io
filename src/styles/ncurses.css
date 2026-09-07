@@ -19,7 +19,7 @@
 
 html {
   background-color: var(--field);
-  font: 400 18px/1.6 ui-monospace, 'SFMono-Regular', 'Menlo', 'Consolas', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
+  font: 400 18px/1.5 ui-monospace, 'SFMono-Regular', 'Menlo', 'Consolas', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
   text-size-adjust: 100%;
 }
 
@@ -81,13 +81,13 @@ a:focus-visible {
 #wrapper {
   width: min(var(--width), 100% - var(--cell-x) * 4);
   margin: 0 auto;
-  padding: var(--cell-y) 0 calc(var(--cell-y) * 3);
+  padding: var(--cell-y) 0 calc(var(--cell-y) * 2);
 }
 
 #content {
   display: flex;
   align-items: flex-start;
-  gap: calc(var(--cell-x) * 3);
+  gap: calc(var(--cell-x) * 2);
 }
 
 #left {
@@ -104,7 +104,7 @@ a:focus-visible {
 .box {
   position: relative;
   display: flow-root;
-  margin-bottom: calc(var(--cell-y) * 2);
+  margin-bottom: calc(var(--cell-y) * 1.5);
   background-color: var(--panel);
   box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--shadow);
 }
@@ -211,7 +211,7 @@ a:focus-visible {
 
 .inner > hr {
   height: 0;
-  margin: var(--cell-y) 0;
+  margin: var(--half-y) 0;
   border: 0;
   border-top: 1px solid var(--shadow);
 }
@@ -222,7 +222,7 @@ a:focus-visible {
 }
 
 .entry {
-  margin-bottom: var(--cell-y);
+  margin-bottom: var(--half-y);
 }
 
 .post-list {
@@ -288,13 +288,13 @@ a:focus-visible {
 .markdown h2,
 .markdown h3,
 .markdown h4 {
-  margin: calc(var(--cell-y) * 2) 0 var(--half-y);
+  margin: var(--cell-y) 0 var(--half-y);
   font-size: 1em;
   font-weight: 700;
 }
 
 .markdown h1 {
-  margin-bottom: var(--cell-y);
+  margin-bottom: var(--half-y);
   padding-bottom: var(--half-y);
   border-bottom: 1px solid var(--shadow);
   font-size: 1.6em;
@@ -318,13 +318,13 @@ a:focus-visible {
 }
 
 .markdown p {
-  margin: 0 0 var(--cell-y);
+  margin: 0 0 var(--half-y);
   text-wrap: pretty;
 }
 
 .markdown ul,
 .markdown ol {
-  margin: 0 0 var(--cell-y);
+  margin: 0 0 var(--half-y);
   padding-left: calc(var(--cell-x) * 2);
 }
 
@@ -348,14 +348,14 @@ a:focus-visible {
 }
 
 .markdown blockquote {
-  margin: 0 0 var(--cell-y);
+  margin: 0 0 var(--half-y);
   padding-left: calc(var(--cell-x) * 2);
   border-left: 1px solid var(--shadow);
 }
 
 .markdown hr {
   height: 0;
-  margin: var(--cell-y) 0;
+  margin: var(--half-y) 0;
   border: 0;
   border-top: 1px solid var(--shadow);
 }
@@ -367,7 +367,7 @@ a:focus-visible {
 }
 
 .markdown pre {
-  margin: 0 0 var(--cell-y);
+  margin: 0 0 var(--half-y);
   padding: var(--half-y) var(--cell-x);
   overflow-x: auto;
   border: 1px solid var(--shadow);
@@ -386,7 +386,7 @@ a:focus-visible {
   display: block;
   max-width: 100%;
   height: auto;
-  margin: 0 auto var(--cell-y);
+  margin: 0 auto var(--half-y);
   border: 1px solid var(--shadow);
 }
 
@@ -400,7 +400,7 @@ a:focus-visible {
   display: block;
   max-width: 100%;
   width: max-content;
-  margin-bottom: var(--cell-y);
+  margin-bottom: var(--half-y);
   overflow-x: auto;
   border-collapse: collapse;
 }
@@ -413,7 +413,7 @@ a:focus-visible {
 }
 
 .admonition {
-  margin: 0 0 var(--cell-y);
+  margin: 0 0 var(--half-y);
   padding: var(--half-y) var(--cell-x);
   border: 1px solid var(--shadow);
   background-color: var(--panel-hi);
@@ -447,7 +447,7 @@ a:focus-visible {
 #footer .inner {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--cell-y) calc(var(--cell-x) * 4);
+  gap: var(--half-y) calc(var(--cell-x) * 4);
 }
 
 #footer h2 {
@@ -505,15 +505,15 @@ a.external::before {
     grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
     gap: 0 calc(var(--cell-x) * 2);
     align-items: start;
-    margin-bottom: var(--cell-y);
+    margin-bottom: var(--half-y);
   }
 }
 
 .markdown .donate-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(26ch, 1fr));
-  gap: var(--cell-y) calc(var(--cell-x) * 2);
-  margin: 0 0 var(--cell-y);
+  gap: var(--half-y) calc(var(--cell-x) * 2);
+  margin: 0 0 var(--half-y);
 }
 
 .markdown .donate-card {
