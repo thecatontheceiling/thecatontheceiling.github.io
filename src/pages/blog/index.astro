@@ -1,0 +1,45 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { tags as tagInfo } from '../../site.js';
+
+const posts = (await getCollection('blog')).sort((a, b) => b.data.date - a.data.date);
+const fmt = (d) => d.toISOString().slice(0, 10);
+---
+
+<Base title="Blog">
+  <div class="box">
+    <h1 class="sr-only">Blog</h1>
+    <fieldset class="inner">
+      <legend>Published articles</legend>
+      <p class="meta">{posts.length} {posts.length === 1 ? 'article' : 'articles'}, newest first.</p>
+      <hr />
+      <ul class="post-list">
+        {posts.map((post) => (
+          <li class="entry">
+            <h2><a href={`/blog/${post.id}`}>{post.data.title}</a></h2>
+            <p class="meta">
+              <time datetime={post.data.date.toISOString()}>{fmt(post.data.date)}</time> |{' '}
+              {post.data.tags.map((tag, i) => (
+                <>
+                  {i > 0 && ', '}
+                  <a href={`/blog/tags/${tagInfo[tag].permalink}`}>{tagInfo[tag].label}</a>
+                </>
+              ))}
+            </p>
+            {post.data.description && <p>{post.data.description}</p>}
+          </li>
+        ))}
+      </ul>
+      <hr />
+      <p class="meta">Browse by topic:{' '}
+        {Object.entries(tagInfo).map(([id, info], i) => (
+          <>
+            {i > 0 && ' | '}
+            <a href={`/blog/tags/${info.permalink}`}>{info.label}</a>
+          </>
+        ))}
+      </p>
+    </fieldset>
+  </div>
+</Base>

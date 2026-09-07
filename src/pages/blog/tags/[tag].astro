@@ -1,0 +1,41 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import { tags as tagInfo } from '../../../site.js';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return Object.entries(tagInfo).map(([id, info]) => ({
+    params: { tag: info.permalink },
+    props: {
+      label: info.label,
+      posts: posts.filter((p) => p.data.tags.includes(id)).sort((a, b) => b.data.date - a.data.date),
+    },
+  }));
+}
+
+const { label, posts } = Astro.props;
+const fmt = (d) => d.toISOString().slice(0, 10);
+---
+
+<Base title={`Posts tagged "${label}"`}>
+  <div class="box">
+    <h1 class="sr-only">{label}</h1>
+    <fieldset class="inner">
+      <legend>{label}</legend>
+      <p class="meta">{posts.length} {posts.length === 1 ? 'article' : 'articles'}, newest first.</p>
+      <hr />
+      <ul class="post-list">
+        {posts.map((post) => (
+          <li class="entry">
+            <h2><a href={`/blog/${post.id}`}>{post.data.title}</a></h2>
+            <p class="meta"><time datetime={post.data.date.toISOString()}>{fmt(post.data.date)}</time></p>
+            {post.data.description && <p>{post.data.description}</p>}
+          </li>
+        ))}
+      </ul>
+      <hr />
+      <p><a href="/blog">All posts</a></p>
+    </fieldset>
+  </div>
+</Base>

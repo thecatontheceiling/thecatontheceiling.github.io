@@ -1,0 +1,95 @@
+---
+import { getCollection } from 'astro:content';
+import { site, menubar, menus, tags, footer } from '../site.js';
+import { isExternal } from '../lib/links.js';
+import '../styles/ncurses.css';
+
+const { title, description, headings = [] } = Astro.props;
+const pageDescription = description ?? site.description;
+const path = Astro.url.pathname.replace(/\.html$/, '') || '/';
+const canonical = new URL(path === '/index' ? '/' : path, Astro.site);
+const pageTitle = title === site.title ? title : `${title} | ${site.title}`;
+const isCurrent = (href) => href === path || (href !== '/' && path.startsWith(`${href}/`));
+const ext = (href) => isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {};
+const recentPosts = (await getCollection('blog')).sort((a, b) => b.data.date - a.data.date).slice(0, 5);
+const recent = { title: 'Recent articles', items: recentPosts.map((p) => ({ label: p.data.title, href: `/blog/${p.id}` })) };
+const topics = { title: 'Topics', items: Object.values(tags).map((t) => ({ label: t.label, href: `/blog/tags/${t.permalink}` })) };
+const groups = [...menus.slice(0, 2), ...(recentPosts.length > 0 ? [recent] : []), ...menus.slice(2), topics];
+const sidebar = headings.length > 0
+  ? [{ title: 'Contents', items: headings.map((h) => ({ label: h.text, href: `#${h.slug}` })) }, ...groups]
+  : groups;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{pageTitle}</title>
+    <meta name="color-scheme" content="dark light"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content={pageDescription} />
+    <meta name="theme-color" content="#bb90a2"/>
+    <meta name="msapplication-TileColor" content="#ffffff"/>
+    <meta property="og:title" content={title} />
+    <meta property="og:image" content={new URL('/img/embed.jpg', Astro.site)} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:type" content="website"/>
+    <meta property="og:site_name" content="Lyssa's schizoposting club"/>
+    <meta property="og:url" content={canonical.href} />
+    <link rel="canonical" href={canonical.href} />
+    <link rel="icon" href="/img/favicon.ico" />
+    <link rel="alternate" type="application/rss+xml" title={site.title} href="/blog/rss.xml" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <div id="menubar">
+      <nav class="bar" aria-label="Primary">
+        <a class="brand" href="/">
+          <img id="logo" src={site.logo} alt="" />
+          <span>{site.title}</span>
+        </a>
+          {menubar.map((item) => (
+            <a href={item.href} {...ext(item.href)} aria-current={isCurrent(item.href) ? 'page' : null}>{item.label}</a>
+          ))}
+      </nav>
+    </div>
+
+    <div id="wrapper">
+      <div id="content">
+        <aside id="left" aria-label="Site sections">
+          {sidebar.map((group) => (
+            <fieldset class="menu">
+              <legend>{group.title}</legend>
+              <ul>
+                {group.items.map((item) => (
+                  <li>
+                    <a href={item.href} {...ext(item.href)} class={isExternal(item.href) ? 'external' : null} aria-current={isCurrent(item.href) ? 'page' : null}>{item.label}</a>
+                  </li>
+                ))}
+              </ul>
+            </fieldset>
+          ))}
+        </aside>
+
+        <main id="main">
+          <slot />
+        </main>
+      </div>
+
+      <footer id="footer" class="box">
+        <div class="inner">
+          {footer.map((col) => (
+            <div>
+              <h2>{col.title}</h2>
+              <ul>
+                {col.items.map((item) => (
+                  <li><a href={item.href} {...ext(item.href)} class={!item.icon && isExternal(item.href) ? 'external' : null}>{item.icon && <img class="ico" src={`/img/${item.icon}.svg`} alt="" />}{item.label}</a></li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
