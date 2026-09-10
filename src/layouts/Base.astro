@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { site, menubar, menus, tags, footer } from '../site.js';
+import { site, menubar, menus, footer } from '../site.js';
 import { isExternal } from '../lib/links.js';
 import '../styles/ncurses.css';
 
@@ -13,11 +13,10 @@ const isCurrent = (href) => href === path || (href !== '/' && path.startsWith(`$
 const ext = (href) => isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {};
 const recentPosts = (await getCollection('blog')).sort((a, b) => b.data.date - a.data.date).slice(0, 5);
 const recent = { title: 'Recent articles', items: recentPosts.map((p) => ({ label: p.data.title, href: `/blog/${p.id}` })) };
-const topics = { title: 'Topics', items: Object.values(tags).map((t) => ({ label: t.label, href: `/blog/tags/${t.permalink}` })) };
-const groups = [...menus.slice(0, 2), ...(recentPosts.length > 0 ? [recent] : []), ...menus.slice(2), topics];
-const sidebar = headings.length > 0
-  ? [{ title: 'Contents', items: headings.map((h) => ({ label: h.text, href: `#${h.slug}` })) }, ...groups]
-  : groups;
+const groups = [...menus.slice(0, 2), ...(recentPosts.length > 0 ? [recent] : []), ...menus.slice(2)];
+const toc = headings.length > 0
+  ? { title: 'Contents', items: headings.map((h) => ({ label: h.text, href: `#${h.slug}` })) }
+  : null;
 ---
 
 <!doctype html>
@@ -57,7 +56,7 @@ const sidebar = headings.length > 0
     <div id="wrapper">
       <div id="content">
         <aside id="left" aria-label="Site sections">
-          {sidebar.map((group) => (
+          {groups.map((group) => (
             <fieldset class="menu">
               <legend>{group.title}</legend>
               <ul>
@@ -74,6 +73,21 @@ const sidebar = headings.length > 0
         <main id="main">
           <slot />
         </main>
+
+        {toc && (
+          <aside id="right" aria-label="On this page">
+            <fieldset class="menu menu--toc">
+              <legend>{toc.title}</legend>
+              <ul>
+                {toc.items.map((item) => (
+                  <li>
+                    <a href={item.href}>{item.label}</a>
+                  </li>
+                ))}
+              </ul>
+            </fieldset>
+          </aside>
+        )}
       </div>
 
       <footer id="footer" class="box">

@@ -1,12 +1,11 @@
 import { defineMdastPlugin } from 'satteri';
-
-const EXTERNAL = /^https?:/i;
+import { isExternal } from './links.js';
 
 export default defineMdastPlugin({
   name: 'external-links',
   link(node, ctx) {
     const url = node.url;
-    if (!EXTERNAL.test(url)) return;
+    if (!isExternal(url)) return;
 
     const data = node.data || {};
     const hProperties = { ...(data.hProperties || {}) };
