@@ -20,12 +20,15 @@ const fmt = (d) => d.toISOString().slice(0, 10);
             <h2><a href={`/blog/${post.id}`}>{post.data.title}</a></h2>
             <p class="meta">
               <time datetime={post.data.date.toISOString()}>{fmt(post.data.date)}</time> |{' '}
-              {post.data.tags.map((tag, i) => (
-                <>
-                  {i > 0 && ', '}
-                  <a href={`/blog/tags/${tagInfo[tag].permalink}`}>{tagInfo[tag].label}</a>
-                </>
-              ))}
+              {post.data.tags.map((tag, i) => {
+                const info = tagInfo[tag] ?? { label: tag, permalink: tag };
+                return (
+                  <>
+                    {i > 0 && ', '}
+                    <a href={`/blog/tags/${info.permalink}`}>{info.label}</a>
+                  </>
+                );
+              })}
             </p>
             {post.data.description && <p>{post.data.description}</p>}
           </li>

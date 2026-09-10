@@ -24,12 +24,15 @@ const date = entry.data.date.toISOString().slice(0, 10);
       <legend>{entry.data.title}</legend>
       <p class="meta">
         <time datetime={entry.data.date.toISOString()}>{date}</time> |{' '}
-        {entry.data.tags.map((tag, i) => (
-          <>
-            {i > 0 && ', '}
-            <a href={`/blog/tags/${tagInfo[tag].permalink}`}>{tagInfo[tag].label}</a>
-          </>
-        ))}
+        {entry.data.tags.map((tag, i) => {
+          const info = tagInfo[tag] ?? { label: tag, permalink: tag };
+          return (
+            <>
+              {i > 0 && ', '}
+              <a href={`/blog/tags/${info.permalink}`}>{info.label}</a>
+            </>
+          );
+        })}
       </p>
       <hr />
       <div class="markdown"><Content /></div>
