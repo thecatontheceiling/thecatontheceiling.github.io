@@ -9,8 +9,7 @@ export default defineMdastPlugin({
 
     const data = node.data || {};
     const hProperties = { ...(data.hProperties || {}) };
-    const existing = hProperties.class ? String(hProperties.class) : '';
-    hProperties.class = (existing ? existing + ' ' : '') + 'external';
+    hProperties.class = [hProperties.class, 'external'].filter(Boolean).join(' ');
     hProperties.target = '_blank';
     hProperties.rel = 'noopener noreferrer';
 

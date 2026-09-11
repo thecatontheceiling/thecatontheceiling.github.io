@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { tags as tagInfo } from '../../site.js';
+import { resolveTag, tagHref } from '../../site.js';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog');
@@ -24,15 +24,12 @@ const date = entry.data.date.toISOString().slice(0, 10);
       <legend>{entry.data.title}</legend>
       <p class="meta">
         <time datetime={entry.data.date.toISOString()}>{date}</time> |{' '}
-        {entry.data.tags.map((tag, i) => {
-          const info = tagInfo[tag] ?? { label: tag, permalink: tag };
-          return (
-            <>
-              {i > 0 && ', '}
-              <a href={`/blog/tags/${info.permalink}`}>{info.label}</a>
-            </>
-          );
-        })}
+        {entry.data.tags.map((tag, i) => (
+          <>
+            {i > 0 && ', '}
+            <a href={tagHref(tag)}>{resolveTag(tag).label}</a>
+          </>
+        ))}
       </p>
       <hr />
       <div class="markdown"><Content /></div>

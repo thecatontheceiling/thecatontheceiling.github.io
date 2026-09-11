@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { tags as tagInfo } from '../../site.js';
+import { tags as tagInfo, resolveTag, tagHref } from '../../site.js';
 
 const posts = (await getCollection('blog')).sort((a, b) => b.data.date - a.data.date);
 const fmt = (d) => d.toISOString().slice(0, 10);
@@ -20,15 +20,12 @@ const fmt = (d) => d.toISOString().slice(0, 10);
             <h2><a href={`/blog/${post.id}`}>{post.data.title}</a></h2>
             <p class="meta">
               <time datetime={post.data.date.toISOString()}>{fmt(post.data.date)}</time> |{' '}
-              {post.data.tags.map((tag, i) => {
-                const info = tagInfo[tag] ?? { label: tag, permalink: tag };
-                return (
-                  <>
-                    {i > 0 && ', '}
-                    <a href={`/blog/tags/${info.permalink}`}>{info.label}</a>
-                  </>
-                );
-              })}
+              {post.data.tags.map((tag, i) => (
+                <>
+                  {i > 0 && ', '}
+                  <a href={tagHref(tag)}>{resolveTag(tag).label}</a>
+                </>
+              ))}
             </p>
             {post.data.description && <p>{post.data.description}</p>}
           </li>
@@ -39,7 +36,7 @@ const fmt = (d) => d.toISOString().slice(0, 10);
         {Object.entries(tagInfo).map(([id, info], i) => (
           <>
             {i > 0 && ' | '}
-            <a href={`/blog/tags/${info.permalink}`}>{info.label}</a>
+            <a href={tagHref(id)}>{info.label}</a>
           </>
         ))}
       </p>

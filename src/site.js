@@ -11,7 +11,12 @@ const pageLinks = [
   { label: 'Donate', href: '/donate' },
 ];
 
-export const menubar = [...pageLinks, { label: 'HITMAN 3 Patch', href: '/hitman3patch' }];
+const hitmanLinks = [
+  { label: 'Installation', href: '/hitman3patch' },
+  { label: 'Patch Guide', href: '/hitman3patchguide' },
+];
+
+export const menubar = [...pageLinks, { label: 'HITMAN 3 Patch', href: hitmanLinks[0].href }];
 
 const projects = [
   { label: 'MAS', href: 'https://github.com/massgravel/Microsoft-Activation-Scripts' },
@@ -24,10 +29,7 @@ const projects = [
 
 export const menus = [
   { title: 'Pages', items: pageLinks },
-  { title: 'HITMAN 3 Patch', items: [
-    { label: 'Installation', href: '/hitman3patch' },
-    { label: 'Patch Guide', href: '/hitman3patchguide' },
-  ]},
+  { title: 'HITMAN 3 Patch', items: hitmanLinks },
   { title: 'Projects', items: projects },
 ];
 
@@ -36,11 +38,19 @@ export const tags = {
   'tech-posts': { label: 'Tech', permalink: 'tech' },
 };
 
+export function resolveTag(id) {
+  return tags[id] ?? { label: id, permalink: id };
+}
+
+export function tagHref(id) {
+  return `/blog/tags/${resolveTag(id).permalink}`;
+}
+
 export const footer = [
   { title: 'Navigate', items: [
     ...pageLinks,
-    { label: 'HITMAN 3 Patch', href: '/hitman3patch' },
-    { label: 'Patch Guide', href: '/hitman3patchguide' },
+    { label: 'HITMAN 3 Patch', href: hitmanLinks[0].href },
+    hitmanLinks[1],
   ]},
   { title: 'Projects', items: projects },
   { title: 'Contact', items: [

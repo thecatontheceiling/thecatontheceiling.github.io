@@ -10,6 +10,7 @@ export default defineMdastPlugin({
 
     const heading = node.children[0];
     const hasLabel = heading?.type === 'paragraph' && heading.data?.directiveLabel;
+    const untitled = hasLabel && ctx.textContent(heading).trim() === '';
     const label = hasLabel ? heading.children : null;
     if (hasLabel) ctx.removeChildAt(node, 0);
 
@@ -19,9 +20,7 @@ export default defineMdastPlugin({
       hProperties: { class: `admonition admonition--${kind}` },
     });
 
-    const blank = label && !label.map((n) => n.value ?? '').join('')
-      .replace(/[\s\u200B-\u200D\u2060-\u2064\uFEFF]/gu, '');
-    if (blank) return;
+    if (untitled) return;
 
     ctx.insertChildAt(node, 0, {
       type: 'paragraph',

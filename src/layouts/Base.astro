@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { site, menubar, menus, footer } from '../site.js';
-import { isExternal, normalizePath } from '../lib/links.js';
+import { externalAttrs, normalizePath } from '../lib/links.js';
 import '../styles/ncurses.css';
 
 const { title, description, headings = [] } = Astro.props;
@@ -10,7 +10,6 @@ const path = normalizePath(Astro.url.pathname);
 const canonical = new URL(path, Astro.site);
 const pageTitle = title === site.title ? title : `${title} | ${site.title}`;
 const isCurrent = (href) => href === path || (href !== '/' && path.startsWith(`${href}/`));
-const ext = (href) => isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {};
 const recentPosts = (await getCollection('blog')).sort((a, b) => b.data.date - a.data.date).slice(0, 5);
 const recent = { title: 'Recent articles', items: recentPosts.map((p) => ({ label: p.data.title, href: `/blog/${p.id}` })) };
 const groups = [...menus.slice(0, 2), ...(recentPosts.length > 0 ? [recent] : []), ...menus.slice(2)];
@@ -49,7 +48,7 @@ const toc = headings.length > 0
           <span>{site.title}</span>
         </a>
           {menubar.map((item) => (
-            <a href={item.href} {...ext(item.href)} aria-current={isCurrent(item.href) ? 'page' : null}>{item.label}</a>
+            <a href={item.href} {...externalAttrs(item.href, false)} aria-current={isCurrent(item.href) ? 'page' : null}>{item.label}</a>
           ))}
       </nav>
     </div>
@@ -63,7 +62,7 @@ const toc = headings.length > 0
               <ul>
                 {group.items.map((item) => (
                   <li>
-                    <a href={item.href} {...ext(item.href)} class={isExternal(item.href) ? 'external' : null} aria-current={isCurrent(item.href) ? 'page' : null}>{item.label}</a>
+                    <a href={item.href} {...externalAttrs(item.href)} aria-current={isCurrent(item.href) ? 'page' : null}>{item.label}</a>
                   </li>
                 ))}
               </ul>
@@ -98,7 +97,7 @@ const toc = headings.length > 0
               <h2>{col.title}</h2>
               <ul>
                 {col.items.map((item) => (
-                  <li><a href={item.href} {...ext(item.href)} class={!item.icon && isExternal(item.href) ? 'external' : null}>{item.icon && <img class="ico" src={`/img/${item.icon}.svg`} alt="" />}{item.label}</a></li>
+                  <li><a href={item.href} {...externalAttrs(item.href, !item.icon)}>{item.icon && <img class="ico" src={`/img/${item.icon}.svg`} alt="" />}{item.label}</a></li>
                 ))}
               </ul>
             </div>
@@ -107,5 +106,48 @@ const toc = headings.length > 0
       </footer>
     </div>
     <ws-widget type="cursor" iid="12168" embed="script"></ws-widget>
+    <script is:inline>
+      // the shared cursors widget never announces disconnects over its websocket,
+      // so cursors of closed pages would stay on screen forever without this
+      (() => {
+        const STALE_MS = 10000;
+        const RESCAN_MS = 3000;
+        const SEL = ".cursor-widget-cursor";
+        const seen = new Map();
+        const touch = (el) => {
+          const x = el.style.left;
+          const y = el.style.top;
+          const prev = seen.get(el);
+          if (prev && prev.x === x && prev.y === y) return;
+          seen.set(el, { x, y, t: Date.now() });
+          if (el.dataset.wsStale) {
+            delete el.dataset.wsStale;
+            el.style.display = "";
+          }
+        };
+        const trackAdded = (node) => {
+          if (node.nodeType !== 1) return;
+          if (node.matches(SEL)) touch(node);
+          for (const el of node.querySelectorAll(SEL)) touch(el);
+        };
+        new MutationObserver((mutations) => {
+          for (const m of mutations) {
+            if (m.type === "childList") for (const node of m.addedNodes) trackAdded(node);
+            else if (m.target.matches?.(SEL)) touch(m.target);
+          }
+        }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] });
+        setInterval(() => {
+          const now = Date.now();
+          for (const el of document.querySelectorAll(SEL)) {
+            touch(el);
+            if (now - seen.get(el).t > STALE_MS) {
+              el.dataset.wsStale = "1";
+              el.style.display = "none";
+            }
+          }
+          for (const el of seen.keys()) if (!el.isConnected) seen.delete(el);
+        }, RESCAN_MS);
+      })();
+    </script>
   </body>
 </html>

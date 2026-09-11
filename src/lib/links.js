@@ -11,3 +11,9 @@ export function normalizePath(pathname) {
 export function isExternal(href) {
   return typeof href === 'string' && EXTERNAL.test(href);
 }
+
+export function externalAttrs(href, withClass = true) {
+  if (!isExternal(href)) return {};
+  const attrs = { target: '_blank', rel: 'noopener noreferrer' };
+  return withClass ? { ...attrs, class: 'external' } : attrs;
+}
