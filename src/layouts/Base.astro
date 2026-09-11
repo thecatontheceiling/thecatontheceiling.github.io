@@ -1,13 +1,13 @@
 ---
 import { getCollection } from 'astro:content';
 import { site, menubar, menus, footer } from '../site.js';
-import { isExternal } from '../lib/links.js';
+import { isExternal, normalizePath } from '../lib/links.js';
 import '../styles/ncurses.css';
 
 const { title, description, headings = [] } = Astro.props;
 const pageDescription = description ?? site.description;
-const path = Astro.url.pathname.replace(/\.html$/, '') || '/';
-const canonical = new URL(path === '/index' ? '/' : path, Astro.site);
+const path = normalizePath(Astro.url.pathname);
+const canonical = new URL(path, Astro.site);
 const pageTitle = title === site.title ? title : `${title} | ${site.title}`;
 const isCurrent = (href) => href === path || (href !== '/' && path.startsWith(`${href}/`));
 const ext = (href) => isExternal(href) ? { target: '_blank', rel: 'noopener noreferrer' } : {};
