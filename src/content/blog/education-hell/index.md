@@ -31,7 +31,9 @@ For people who don't know yet: I am still in 10th grade. In high school. Shockin
 
 Yes. It's really not that riveting. Consult this graph:
 
-![Look at this shit](./assets/star-history.png)
+<ws-widget type="viewer" iid="12166" embed="script">
+  <img src="/img/blog/star-history.png" alt="Look at this shit" />
+</ws-widget>
 
 Look at that. It's both beautiful and repulsive. Doesn't that make you say "Fuck me, with God as my witness"?
 

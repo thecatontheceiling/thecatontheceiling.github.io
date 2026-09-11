@@ -11,7 +11,9 @@ tags:
 Have you ever stopped to look at how *simple* some of the most popular sites on the internet actually are? Take Reddit for example:
 
 
-![Screenshot of Reddit, the best place to jerk your ego off](./assets/reddit.png)
+<ws-widget type="viewer" iid="12166" embed="script">
+  <img src="/img/blog/reddit.png" alt="Screenshot of Reddit, the best place to jerk your ego off" />
+</ws-widget>
 
 It's features (excluding the *insufferable amount* of random noise) consist of: 
 * Serving you popular posts from "subreddits", a categorization system which still holds the medal for the worst way to organize content ever conceived.

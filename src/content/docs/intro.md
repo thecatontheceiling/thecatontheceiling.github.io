@@ -41,4 +41,6 @@ Feel free to leave a message on my [guestbook!](https://thecatontheceiling.atabo
 
 ---
 
-![look at this dumbass](https://minky.materii.dev)
+<ws-widget type="viewer" iid="12166" embed="script">
+  <img src="https://minky.materii.dev" alt="look at this dumbass" />
+</ws-widget>
