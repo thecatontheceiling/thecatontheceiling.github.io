@@ -16,7 +16,9 @@ description: A step-by-step guide to installing the HITMAN World of Assassinatio
 
 2.  Open Steam on your PC and search for "HITMAN: World of Assassination". Go to the store page and you will see this button:
 
-    ![image](/img/hitman3/steam.png)
+    <ws-widget type="viewer" iid="12166" embed="script">
+      <img src="/img/hitman3/steam.png" alt="image" />
+    </ws-widget>
 
 3.  Press the **Download** button and wait for Steam to install the game to your PC.
 
