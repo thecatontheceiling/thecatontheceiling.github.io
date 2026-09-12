@@ -362,10 +362,6 @@
         </svg>
     `
 
-    const customStyle = document.createElement("style")
-    customStyle.textContent = settings.css || ""
-    if (customStyle.textContent) document.head.appendChild(customStyle)
-
     const cursors = new Map()
     const lastSeen = new Map()
     const STALE_MS = 10000
@@ -430,14 +426,12 @@
         return curr
     }
 
+    let rectLeft = 0
+    let rectTop = 0
     function getRects() {
         var b00 = document.querySelector(settings.left_box).getBoundingClientRect()
-        var b01 = document.querySelector(settings.right_box).getBoundingClientRect()
-        window.rectLeft = b00.left
-        window.rectRight = b01.right
-        window.rectTop = b00.top
-        window.rectWidth = rectRight - rectLeft
-        window.rectHeight = document.body.clientHeight
+        rectLeft = b00.left
+        rectTop = b00.top
         cursorsContainer.style.left = `${rectLeft}px`
         cursorsContainer.style.top = `${rectTop + window.scrollY}px`
     }
