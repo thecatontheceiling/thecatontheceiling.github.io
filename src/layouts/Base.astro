@@ -106,48 +106,5 @@ const toc = headings.length > 0
       </footer>
     </div>
     <script is:inline src="/js/cursor-widget.js" data-iid="12168"></script>
-    <script is:inline>
-      // the shared cursors widget never announces disconnects over its websocket,
-      // so cursors of closed pages would stay on screen forever without this
-      (() => {
-        const STALE_MS = 10000;
-        const RESCAN_MS = 3000;
-        const SEL = ".cursor-widget-cursor";
-        const seen = new Map();
-        const touch = (el) => {
-          const x = el.style.left;
-          const y = el.style.top;
-          const prev = seen.get(el);
-          if (prev && prev.x === x && prev.y === y) return;
-          seen.set(el, { x, y, t: Date.now() });
-          if (el.dataset.wsStale) {
-            delete el.dataset.wsStale;
-            el.style.display = "";
-          }
-        };
-        const trackAdded = (node) => {
-          if (node.nodeType !== 1) return;
-          if (node.matches(SEL)) touch(node);
-          for (const el of node.querySelectorAll(SEL)) touch(el);
-        };
-        new MutationObserver((mutations) => {
-          for (const m of mutations) {
-            if (m.type === "childList") for (const node of m.addedNodes) trackAdded(node);
-            else if (m.target.matches?.(SEL)) touch(m.target);
-          }
-        }).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["style"] });
-        setInterval(() => {
-          const now = Date.now();
-          for (const el of document.querySelectorAll(SEL)) {
-            touch(el);
-            if (now - seen.get(el).t > STALE_MS) {
-              el.dataset.wsStale = "1";
-              el.style.display = "none";
-            }
-          }
-          for (const el of seen.keys()) if (!el.isConnected) seen.delete(el);
-        }, RESCAN_MS);
-      })();
-    </script>
   </body>
 </html>

@@ -340,6 +340,8 @@
     if (customStyle.textContent) document.head.appendChild(customStyle)
 
     const cursors = new Map()
+    const lastSeen = new Map()
+    const STALE_MS = 10000
 
     const cursorsContainer = document.createElement("div")
     cursorsContainer.style.position = "absolute"
@@ -412,12 +414,16 @@
         const curr = getCursorEl(id)
         curr.style.left = `${x}px`
         curr.style.top = `${y}px`
+        lastSeen.set(id, Date.now())
     })
 
     ws.addEventListener("close", () => {
         for (const curr of cursors.values()) curr.remove()
         cursors.clear()
+        lastSeen.clear()
         clearInterval(ping)
+        clearInterval(keepalive)
+        clearInterval(staleTimer)
     })
 
     function sendPos(x, y) {
@@ -443,12 +449,35 @@
     }
 
     let lastSend = 0
+    let lastX = 0
+    let lastY = 0
+    let havePos = false
     document.addEventListener("mousemove", (e) => {
         const now = performance.now()
         if (now - lastSend < 22) return
         lastSend = now
-        sendPos(Math.round(e.pageX), Math.round(e.pageY))
+        lastX = Math.round(e.pageX)
+        lastY = Math.round(e.pageY)
+        havePos = true
+        sendPos(lastX, lastY)
     })
+
+    const keepalive = setInterval(() => {
+        if (!havePos) return
+        sendPos(lastX, lastY)
+    }, 5000)
+
+    const staleTimer = setInterval(() => {
+        const now = Date.now()
+        for (const [id, t] of lastSeen) {
+            if (now - t > STALE_MS) {
+                const el = cursors.get(id)
+                if (el) el.remove()
+                cursors.delete(id)
+                lastSeen.delete(id)
+            }
+        }
+    }, 3000)
 
     const ping = setInterval(() => {
         if (ws.readyState !== WebSocket.OPEN) return
