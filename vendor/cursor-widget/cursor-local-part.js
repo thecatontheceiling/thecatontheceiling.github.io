@@ -196,4 +196,8 @@
         const buf = new ArrayBuffer(1)
         ws.send(buf)
     }, 30000);
+
+    window.addEventListener("pagehide", () => {
+        try { ws.close(); } catch {}
+    });
 })()
