@@ -309,7 +309,29 @@
     }
     const settings = Object.assign({}, DEFAULT_SETTINGS, readSettingsOverride());
     const iid = (hostScript && hostScript.getAttribute("data-iid")) || DEFAULT_IID;
-    const is_resize = !!settings.left_box && !!settings.right_box && !!document.querySelector(settings.left_box) && !!document.querySelector(settings.right_box)
+    function hasEl(sel) {
+        if (!sel) return false
+        try { return !!document.querySelector(sel) } catch (e) { return false }
+    }
+    const is_resize = !!settings.left_box && !!settings.right_box && hasEl(settings.left_box) && hasEl(settings.right_box)
+
+    function sanitizeColor(value, fallback) {
+        if (typeof value !== "string" || !value || value.length > 200) return fallback
+        const probe = document.createElement("div")
+        probe.style.color = ""
+        probe.style.color = value
+        return probe.style.color || fallback
+    }
+    function sanitizeNumber(value, fallback, min, max) {
+        const n = Number(value)
+        if (!Number.isFinite(n)) return fallback
+        return Math.min(max, Math.max(min, n))
+    }
+    const cursorWidth = sanitizeNumber(settings.cursor_width, DEFAULT_SETTINGS.cursor_width, 4, 64)
+    const cursorHeight = sanitizeNumber(settings.cursor_height, DEFAULT_SETTINGS.cursor_height, 4, 64)
+    const cursorOpacity = sanitizeNumber(settings.cursor_opacity, DEFAULT_SETTINGS.cursor_opacity, 0, 10)
+    const cursorFill = sanitizeColor(settings.cursor_fill, DEFAULT_SETTINGS.cursor_fill)
+    const cursorOutline = sanitizeColor(settings.cursor_outline, DEFAULT_SETTINGS.cursor_outline)
 
     const style = document.createElement("style")
     style.textContent = `
@@ -317,21 +339,26 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: ${settings.cursor_width}px;
-            height: ${settings.cursor_height}px;
+            width: ${cursorWidth}px;
+            height: ${cursorHeight}px;
             pointer-events: none;
-            z-index: 99999999;
-            opacity: ${settings.cursor_opacity / 10};
+            z-index: 9999;
+            opacity: ${cursorOpacity / 10};
             transform: translate(-2px, -2px);
             transition: left 0.05s linear, top 0.05s linear;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .cursor-widget-cursor {
+                transition: none;
+            }
         }
     `
     document.head.appendChild(style)
 
     const CURSOR_SVG = `
-        <svg width="${settings.cursor_width}" height="${settings.cursor_height}" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+        <svg width="${cursorWidth}" height="${cursorHeight}" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
             <path d="M2 1 L2 17 L6.5 13.5 L9 19 L11.5 18 L9 12.5 L15 12.5 Z"
-                  fill="${settings.cursor_fill}" stroke="${settings.cursor_outline}" stroke-width="1.2" stroke-linejoin="round"/>
+                  fill="${cursorFill}" stroke="${cursorOutline}" stroke-width="1.2" stroke-linejoin="round"/>
         </svg>
     `
 
@@ -349,8 +376,47 @@
     cursorsContainer.style.left = "0"
     document.body.appendChild(cursorsContainer)
 
-    const ws = resilientWebSocket(`wss://widget.menal.xyz/cursors/ws?iid=${encodeURIComponent(iid)}`)
-    ws.binaryType = "arraybuffer"
+    const WS_URL = `wss://widget.menal.xyz/cursors/ws?iid=${encodeURIComponent(iid)}`
+    const RECONNECT_BASE_MS = 1000
+    const RECONNECT_MAX_MS = 30000
+    let ws = null
+    let reconnectAttempt = 0
+    let reconnectTimer = null
+    let shuttingDown = false
+
+    function clearRemoteCursors() {
+        for (const curr of cursors.values()) curr.remove()
+        cursors.clear()
+        lastSeen.clear()
+    }
+
+    function scheduleReconnect() {
+        if (shuttingDown || reconnectTimer !== null) return
+        const delay = Math.min(RECONNECT_BASE_MS * (2 ** reconnectAttempt), RECONNECT_MAX_MS)
+        reconnectAttempt += 1
+        reconnectTimer = setTimeout(connect, delay + Math.random() * 250)
+    }
+
+    function connect() {
+        reconnectTimer = null
+        if (shuttingDown) return
+        const sock = resilientWebSocket(WS_URL)
+        sock.binaryType = "arraybuffer"
+        sock.addEventListener("message", handleMessage)
+        sock.addEventListener("open", () => {
+            reconnectAttempt = 0
+            if (havePos) sendPos(lastX, lastY)
+        })
+        sock.addEventListener("close", () => {
+            if (sock !== ws) return
+            clearRemoteCursors()
+            scheduleReconnect()
+        })
+        sock.addEventListener("error", () => {
+            scheduleReconnect()
+        })
+        ws = sock
+    }
 
     function getCursorEl(id) {
         let curr = cursors.get(id)
@@ -387,7 +453,8 @@
         setInterval(getRects, 1000)
     }
 
-    ws.addEventListener("message", (event) => {
+    function handleMessage(event) {
+        if (!(event.data instanceof ArrayBuffer)) return
         const view = new DataView(event.data)
         if (view.byteLength != 8) return
 
@@ -415,19 +482,12 @@
         curr.style.left = `${x}px`
         curr.style.top = `${y}px`
         lastSeen.set(id, Date.now())
-    })
+    }
 
-    ws.addEventListener("close", () => {
-        for (const curr of cursors.values()) curr.remove()
-        cursors.clear()
-        lastSeen.clear()
-        clearInterval(ping)
-        clearInterval(keepalive)
-        clearInterval(staleTimer)
-    })
+    connect()
 
     function sendPos(x, y) {
-        if (ws.readyState !== WebSocket.OPEN) return
+        if (!ws || ws.readyState !== WebSocket.OPEN) return
         if (is_resize) {
             x -= rectLeft
             y -= rectTop + window.scrollY
@@ -452,15 +512,26 @@
     let lastX = 0
     let lastY = 0
     let havePos = false
-    document.addEventListener("mousemove", (e) => {
+    function reportPos(x, y) {
+        if (!Number.isFinite(x) || !Number.isFinite(y)) return
         const now = performance.now()
         if (now - lastSend < 22) return
         lastSend = now
-        lastX = Math.round(e.pageX)
-        lastY = Math.round(e.pageY)
+        lastX = Math.round(x)
+        lastY = Math.round(y)
         havePos = true
         sendPos(lastX, lastY)
+    }
+    document.addEventListener("mousemove", (e) => {
+        reportPos(e.pageX, e.pageY)
     })
+    document.addEventListener("pointermove", (e) => {
+        reportPos(e.pageX, e.pageY)
+    }, { passive: true })
+    document.addEventListener("touchmove", (e) => {
+        const t = e.touches && e.touches[0]
+        if (t) reportPos(t.pageX, t.pageY)
+    }, { passive: true })
 
     const keepalive = setInterval(() => {
         if (!havePos) return
@@ -480,12 +551,18 @@
     }, 3000)
 
     const ping = setInterval(() => {
-        if (ws.readyState !== WebSocket.OPEN) return
+        if (!ws || ws.readyState !== WebSocket.OPEN) return
         const buf = new ArrayBuffer(1)
         ws.send(buf)
     }, 30000);
 
     window.addEventListener("pagehide", () => {
-        try { ws.close(); } catch {}
+        shuttingDown = true
+        clearTimeout(reconnectTimer)
+        reconnectTimer = null
+        clearInterval(ping)
+        clearInterval(keepalive)
+        clearInterval(staleTimer)
+        if (ws) try { ws.close(); } catch {}
     });
 })()
