@@ -336,6 +336,22 @@
     const cursorFill = sanitizeColor(settings.cursor_fill, DEFAULT_SETTINGS.cursor_fill)
     const cursorOutline = sanitizeColor(settings.cursor_outline, DEFAULT_SETTINGS.cursor_outline)
 
+    const PAGE_TAG_BASE = 0xC000
+    function normalizePage(pathname) {
+        const p = String(pathname ?? "").replace(/\.html$/, "").replace(/\/$/, "").replace(/\/index$/, "")
+        return p || "/"
+    }
+    function pageTagFor(path) {
+        let h = 0x811c9dc5
+        const s = normalizePage(path)
+        for (let i = 0; i < s.length; i++) {
+            h ^= s.charCodeAt(i)
+            h = Math.imul(h, 0x01000193)
+        }
+        return PAGE_TAG_BASE | ((h >>> 0) & 0x3fff)
+    }
+    const pageTag = is_resize ? 0 : pageTagFor(location.pathname)
+
     const style = document.createElement("style")
     style.textContent = `
         .cursor-widget-cursor {
@@ -492,6 +508,10 @@
             h = view.getUint16(6, true)
         }
 
+        if (!is_resize) {
+            if (h >= PAGE_TAG_BASE && h !== pageTag) return
+        }
+
         if (is_resize) {
             x = Math.min(x, innerWidth - rectLeft - 50)
             y = Math.min(y, document.body.clientHeight - 100) * (document.body.clientHeight / h)
@@ -525,7 +545,7 @@
             view.setUint16(0, x, true)
             view.setUint16(2, y, true)
         }
-        view.setUint16(4, document.body.clientHeight, true)
+        view.setUint16(4, is_resize ? document.body.clientHeight : pageTag, true)
         ws.send(buf)
     }
 
