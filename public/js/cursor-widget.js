@@ -289,6 +289,9 @@
 (function () {
     "use strict"
 
+    if (window.__cursorWidget) return;
+    window.__cursorWidget = true;
+
     const hostScript = document.currentScript;
     const DEFAULT_SETTINGS = {
         "cursor_width": 16,
@@ -379,6 +382,14 @@
     let reconnectAttempt = 0
     let reconnectTimer = null
     let shuttingDown = false
+    let suspended = false
+    let started = false
+    let broadcastPaused = document.hidden
+    let reconnectPending = false
+    let keepalive = null
+    let staleTimer = null
+    let ping = null
+    let rectTimer = null
 
     function clearRemoteCursors() {
         for (const curr of cursors.values()) curr.remove()
@@ -387,7 +398,12 @@
     }
 
     function scheduleReconnect() {
-        if (shuttingDown || reconnectTimer !== null) return
+        if (shuttingDown || suspended || !started) return
+        if (document.hidden) {
+            reconnectPending = true
+            return
+        }
+        if (reconnectTimer !== null) return
         const delay = Math.min(RECONNECT_BASE_MS * (2 ** reconnectAttempt), RECONNECT_MAX_MS)
         reconnectAttempt += 1
         reconnectTimer = setTimeout(connect, delay + Math.random() * 250)
@@ -395,13 +411,24 @@
 
     function connect() {
         reconnectTimer = null
-        if (shuttingDown) return
+        if (shuttingDown || suspended || !started) return
+        if (document.hidden) {
+            reconnectPending = true
+            return
+        }
+        if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return
+        ws = null
+        reconnectPending = false
         const sock = resilientWebSocket(WS_URL)
         sock.binaryType = "arraybuffer"
         sock.addEventListener("message", handleMessage)
         sock.addEventListener("open", () => {
+            if (sock !== ws) {
+                try { sock.close(); } catch {}
+                return
+            }
             reconnectAttempt = 0
-            if (havePos) sendPos(lastX, lastY)
+            if (havePos && !broadcastPaused && !document.hidden) sendPos(lastX, lastY)
         })
         sock.addEventListener("close", () => {
             if (sock !== ws) return
@@ -409,6 +436,8 @@
             scheduleReconnect()
         })
         sock.addEventListener("error", () => {
+            if (sock !== ws) return
+            try { sock.close(); } catch {}
             scheduleReconnect()
         })
         ws = sock
@@ -444,7 +473,6 @@
         window.addEventListener("scroll", getRects, {
             passive: true,
         })
-        setInterval(getRects, 1000)
     }
 
     function handleMessage(event) {
@@ -478,10 +506,9 @@
         lastSeen.set(id, Date.now())
     }
 
-    connect()
-
     function sendPos(x, y) {
         if (!ws || ws.readyState !== WebSocket.OPEN) return
+        if (broadcastPaused || document.hidden) return
         if (is_resize) {
             x -= rectLeft
             y -= rectTop + window.scrollY
@@ -508,12 +535,13 @@
     let havePos = false
     function reportPos(x, y) {
         if (!Number.isFinite(x) || !Number.isFinite(y)) return
-        const now = performance.now()
-        if (now - lastSend < 22) return
-        lastSend = now
         lastX = Math.round(x)
         lastY = Math.round(y)
         havePos = true
+        if (broadcastPaused || document.hidden) return
+        const now = performance.now()
+        if (now - lastSend < 22) return
+        lastSend = now
         sendPos(lastX, lastY)
     }
     document.addEventListener("mousemove", (e) => {
@@ -527,12 +555,7 @@
         if (t) reportPos(t.pageX, t.pageY)
     }, { passive: true })
 
-    const keepalive = setInterval(() => {
-        if (!havePos) return
-        sendPos(lastX, lastY)
-    }, 5000)
-
-    const staleTimer = setInterval(() => {
+    function sweepStale() {
         const now = Date.now()
         for (const [id, t] of lastSeen) {
             if (now - t > STALE_MS) {
@@ -542,21 +565,89 @@
                 lastSeen.delete(id)
             }
         }
-    }, 3000)
+    }
 
-    const ping = setInterval(() => {
-        if (!ws || ws.readyState !== WebSocket.OPEN) return
-        const buf = new ArrayBuffer(1)
-        ws.send(buf)
-    }, 30000);
+    function stopTimers() {
+        if (keepalive !== null) clearInterval(keepalive)
+        if (staleTimer !== null) clearInterval(staleTimer)
+        if (ping !== null) clearInterval(ping)
+        if (rectTimer !== null) clearInterval(rectTimer)
+        keepalive = staleTimer = ping = rectTimer = null
+    }
 
-    window.addEventListener("pagehide", () => {
-        shuttingDown = true
-        clearTimeout(reconnectTimer)
-        reconnectTimer = null
-        clearInterval(ping)
-        clearInterval(keepalive)
-        clearInterval(staleTimer)
-        if (ws) try { ws.close(); } catch {}
-    });
+    function start() {
+        if (started || shuttingDown) return
+        started = true
+        suspended = false
+        reconnectPending = false
+        keepalive = setInterval(() => {
+            if (!havePos || broadcastPaused || document.hidden) return
+            sendPos(lastX, lastY)
+        }, 5000)
+        staleTimer = setInterval(sweepStale, 3000)
+        ping = setInterval(() => {
+            if (!ws || ws.readyState !== WebSocket.OPEN) return
+            const buf = new ArrayBuffer(1)
+            ws.send(buf)
+        }, 30000)
+        if (is_resize && rectTimer === null) rectTimer = setInterval(getRects, 1000)
+        if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
+            ws = null
+            connect()
+        } else if (ws.readyState === WebSocket.OPEN && havePos && !broadcastPaused && !document.hidden) {
+            sendPos(lastX, lastY)
+        }
+    }
+
+    function stop() {
+        started = false
+        reconnectPending = false
+        if (reconnectTimer !== null) {
+            clearTimeout(reconnectTimer)
+            reconnectTimer = null
+        }
+        stopTimers()
+        if (ws) {
+            const sock = ws
+            ws = null
+            try { sock.close(1001, "navigation"); } catch {}
+        }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+            broadcastPaused = true
+        } else {
+            broadcastPaused = false
+            if (shuttingDown || suspended || !started) return
+            if (reconnectPending || !ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
+                ws = null
+                connect()
+            } else if (ws.readyState === WebSocket.OPEN && havePos) {
+                sendPos(lastX, lastY)
+            }
+        }
+    })
+    window.addEventListener("pagehide", (event) => {
+        broadcastPaused = true
+        if (event && event.persisted) {
+            stop()
+            suspended = true
+            window.addEventListener("pageshow", function onShow(e) {
+                if (!e || !e.persisted) return
+                window.removeEventListener("pageshow", onShow)
+                broadcastPaused = document.hidden
+                start()
+            })
+        } else {
+            stop()
+            shuttingDown = true
+        }
+    })
+    window.addEventListener("beforeunload", () => {
+        broadcastPaused = true
+        if (ws) try { ws.close(1001, "navigation"); } catch {}
+    })
+
+    start()
 })()
