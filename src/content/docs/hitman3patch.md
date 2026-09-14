@@ -8,11 +8,11 @@ description: Installation guides, download links, and changelog for the HITMAN 3
 :::
 
 :::tip[Main download link]
-**https://pixeldrain.com/u/hMwctC2r**
+**https://pixeldrain.com/u/UQTKRLeX**
 :::
 
 :::tip[Mirror]
-**https://zerofs.link/f/BjPSUFT**
+**https://zerofs.link/f/FaWB9sB/**
 :::
 
 Join to get support + pings for new updates: 
