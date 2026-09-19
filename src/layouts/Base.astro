@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import { site, menubar, menus, footer } from '../site.js';
 import { externalAttrs, normalizePath } from '../lib/links.js';
+import EclipseBackground from '../components/EclipseBackground.astro';
 import '../styles/ncurses.css';
 
 const { title, description, headings = [] } = Astro.props;
@@ -19,7 +20,7 @@ const toc = headings.length > 0
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-eclipse="pending">
   <head>
     <meta charset="utf-8" />
     <title>{pageTitle}</title>
@@ -38,8 +39,21 @@ const toc = headings.length > 0
     <link rel="icon" href="/img/favicon.ico" />
     <link rel="alternate" type="application/rss+xml" title={site.title} href="/blog/rss.xml" />
     <script is:inline src="https://u.widget.st/ar.js"></script>
+    <style is:inline>
+      html[data-eclipse='pending'] body { opacity: 0; }
+      body { transition: opacity 160ms ease-out; }
+      @media (prefers-reduced-motion: reduce) { body { transition: none; } }
+    </style>
+    <script is:inline>
+      setTimeout(function () {
+        var el = document.documentElement;
+        if (el.getAttribute('data-eclipse') === 'pending') el.setAttribute('data-eclipse', 'ready');
+      }, 1500);
+    </script>
+    <noscript><style>html[data-eclipse='pending'] body { opacity: 1; }</style></noscript>
   </head>
   <body>
+    <EclipseBackground />
     <a class="skip" href="#main">Skip to content</a>
     <div id="menubar">
       <nav class="bar" aria-label="Primary">
