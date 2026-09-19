@@ -171,7 +171,7 @@ a:focus-visible {
 .menu {
   margin: 0 0 var(--cell-y);
   padding: 0 0 var(--half-y);
-  border: 1px solid var(--ink);
+  border: 2px solid var(--accent);
   background-color: var(--panel);
   box-shadow: var(--shadow-x) var(--shadow-y) 0 var(--shadow);
 }
@@ -179,12 +179,17 @@ a:focus-visible {
 .menu > legend {
   margin-left: var(--cell-x);
   padding: 0 var(--cell-x);
+  border: 1px solid var(--accent);
+  background-color: var(--panel);
+  color: var(--accent);
   font-weight: 700;
 }
 
 .menu ul {
   margin: 0;
   padding: 0;
+  max-height: calc(var(--cell-y) * 20);
+  overflow: auto;
   list-style: none;
 }
 
@@ -209,21 +214,6 @@ a:focus-visible {
 
 .menu a[aria-current='page']::before {
   content: '> ';
-}
-
-.menu--toc {
-  border: 2px solid var(--accent);
-}
-
-.menu--toc > legend {
-  border: 1px solid var(--accent);
-  background-color: var(--panel);
-  color: var(--accent);
-}
-
-.menu--toc ul {
-  max-height: calc(var(--cell-y) * 20);
-  overflow: auto;
 }
 
 .inner > hr,
