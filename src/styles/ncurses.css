@@ -127,6 +127,44 @@ a:focus-visible {
   text-align: center;
   text-wrap: balance;
 }
+.box > .inner > legend.intro-legend {
+  font-size: 1.9em;
+  letter-spacing: 0.01em;
+}
+
+.eclipse-word {
+  white-space: nowrap;
+}
+
+.eclipse-word .ch {
+  display: inline-block;
+  color: var(--link);
+  animation: eclipse-shimmer 2.6s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * -0.22s);
+}
+
+@supports (background-clip: text) {
+  .eclipse-word .ch {
+    background-image: linear-gradient(100deg, var(--link) 0%, var(--accent) 50%, var(--link) 100%);
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@keyframes eclipse-shimmer {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.16em);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eclipse-word .ch {
+    animation: none;
+  }
+}
 
 #menubar {
   background-color: var(--accent);

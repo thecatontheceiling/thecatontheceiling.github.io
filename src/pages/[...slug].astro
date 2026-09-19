@@ -12,13 +12,22 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content, headings } = await render(entry);
+const gradWord = 'Lyssa';
+const gradIndex = entry.id === 'intro' ? entry.data.title.indexOf(gradWord) : -1;
+const legendBefore = gradIndex >= 0 ? entry.data.title.slice(0, gradIndex) : entry.data.title;
+const legendAfter = gradIndex >= 0 ? entry.data.title.slice(gradIndex + gradWord.length) : '';
+const gradLetters = [...gradWord];
 ---
 
 <Base title={entry.data.title} description={entry.data.description} headings={headings.filter((h) => h.depth <= 3)}>
   <article class="box">
     <h1 class="sr-only">{entry.data.title}</h1>
     <fieldset class="inner markdown">
-      <legend>{entry.data.title}</legend>
+      {gradIndex >= 0 ? (
+        <legend class="intro-legend">{legendBefore}<span class="eclipse-word" aria-label={gradWord}>{gradLetters.map((ch, i) => (<span class="ch" style={`--i:${i}`} aria-hidden="true">{ch}</span>))}</span>{legendAfter}</legend>
+      ) : (
+        <legend>{entry.data.title}</legend>
+      )}
       <Content />
     </fieldset>
   </article>
