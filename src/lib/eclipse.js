@@ -25,15 +25,14 @@ function hash2(x, y) {
 
 function eclipseGeometry(w, h) {
   const s = Math.min(2, Math.max(0.7, Math.sqrt((w * h) / REF_AREA)));
-  const m = w * 0.405;
-  const ww = h * 0.585;
-  const L = w - m;
-  const A = ww;
-  const dist = Math.hypot(L, A);
+  const x1 = -0.12 * w;
+  const x2 = 1.12 * w;
+  const y0 = h * 0.46;
+  const dist = x2 - x1;
   const sag = dist * 0.062;
   const radius = (dist * dist) / (8 * sag) + sag * 0.5;
-  const cx = (m + w) * 0.5 - (A / dist) * (radius - sag);
-  const cy = ww * 0.5 + (L / dist) * (radius - sag);
+  const cx = (x1 + x2) * 0.5;
+  const cy = y0 + (radius - sag);
   let thMin = Infinity;
   let thMax = -Infinity;
   for (const [px, py] of [[0, 0], [w, 0], [0, h], [w, h]]) {
