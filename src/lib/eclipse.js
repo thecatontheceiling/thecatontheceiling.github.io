@@ -192,7 +192,7 @@ function drawStars(ctx, stars, geo, W, H, bw, bh, maxDepth, frame) {
   for (const s of stars) {
     let depth = s.depth0 - s.speed * frame;
     if (depth < 0.5) {
-      s.depth0 = maxDepth;
+      s.depth0 = maxDepth + s.speed * frame;
       depth = maxDepth;
     }
     const fadeIn = Math.min(1, depth / 3);
