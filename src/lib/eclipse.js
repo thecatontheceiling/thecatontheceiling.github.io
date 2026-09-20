@@ -116,7 +116,7 @@ function renderField(ctx, W, H, bw, bh, geo) {
 
 function buildStars(geo, W, H, maxDepth) {
   const span = geo.thetaMax - geo.thetaMin;
-  const count = Math.min(800, Math.max(120, Math.round(span * geo.radius * 0.12)));
+  const count = Math.min(1400, Math.max(260, Math.round(span * geo.radius * 0.3)));
   const stars = [];
   let guard = 0;
   while (stars.length < count && guard++ < count * 20) {
