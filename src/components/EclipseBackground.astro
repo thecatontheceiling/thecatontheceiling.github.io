@@ -1,10 +1,26 @@
----
-const canvasStyle = 'position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated';
----
-<div class="eclipse-bg" aria-hidden="true" style="position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none">
-  <canvas data-eclipse-field style={canvasStyle}></canvas>
-  <canvas data-eclipse-stars style={canvasStyle}></canvas>
+<div class="eclipse-bg" aria-hidden="true">
+  <canvas data-eclipse-field></canvas>
+  <canvas data-eclipse-stars></canvas>
 </div>
+
+<style>
+  .eclipse-bg {
+    position: fixed;
+    inset: 0;
+    height: 100vh;
+    height: 100dvh;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .eclipse-bg canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+</style>
 
 <script>
   import { initEclipse } from '../lib/eclipse.js';

@@ -223,6 +223,8 @@ export function initEclipse() {
   let W = 0;
   let H = 0;
   let laidW = 0;
+  let laidH = 0;
+  let stableH = 0;
   let bw = 0;
   let bh = 0;
   let geo = null;
@@ -238,9 +240,13 @@ export function initEclipse() {
   }
 
   function layout() {
-    W = window.innerWidth;
-    H = window.innerHeight;
-    laidW = W;
+    const vw = window.innerWidth;
+    const vvH = Math.round(window.visualViewport ? window.visualViewport.height : window.innerHeight);
+    stableH = Math.max(stableH || 0, window.innerHeight, vvH);
+    W = vw;
+    H = stableH;
+    laidW = vw;
+    laidH = stableH;
     const q = Math.min(1, Math.max(0.5, Math.sqrt(BUDGET / Math.max(1, W * H))));
     bw = Math.max(2, Math.round((W * q) / 2));
     bh = Math.max(2, Math.round((H * q) / 2));
@@ -270,13 +276,20 @@ export function initEclipse() {
   let timer = 0;
 
   function maybeLayout() {
-    if (window.innerWidth === laidW) return;
+    const vw = window.innerWidth;
+    const vvH = Math.round(window.visualViewport ? window.visualViewport.height : window.innerHeight);
+    const vh = Math.max(window.innerHeight, vvH);
+    if (Math.abs(vw - laidW) < 1 && vh <= laidH + 8) return;
+    stableH = Math.max(stableH, vh);
     layout();
   }
-  window.addEventListener('resize', () => {
+  function scheduleMaybeLayout() {
     window.clearTimeout(timer);
     timer = window.setTimeout(maybeLayout, 200);
-  });
+  }
+  window.addEventListener('resize', scheduleMaybeLayout);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', scheduleMaybeLayout);
+  window.addEventListener('orientationchange', scheduleMaybeLayout);
 
   layout();
   if (!reduce) requestAnimationFrame(tick);
