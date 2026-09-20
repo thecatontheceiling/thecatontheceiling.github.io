@@ -24,6 +24,7 @@ html {
 
 body {
   margin: 0;
+  overflow-x: clip;
   color: var(--ink);
 }
 
@@ -119,16 +120,33 @@ a:focus-visible {
   border: 1px solid var(--shadow);
 }
 
+.box > .inner,
+fieldset.menu {
+  min-inline-size: 0;
+  max-width: 100%;
+}
+
+.box > .inner > legend,
+.menu > legend {
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+ws-widget {
+  display: block;
+  max-width: 100%;
+}
+
 .box > .inner > legend {
   margin-inline: auto;
   padding: 0 var(--cell-x);
-  font-size: 1.3em;
+  font-size: clamp(1.1em, 1em + 1.5vw, 1.3em);
   font-weight: 700;
   text-align: center;
   text-wrap: balance;
 }
 .box > .inner > legend.intro-legend {
-  font-size: 1.9em;
+  font-size: clamp(1.35em, 1.2em + 3vw, 1.9em);
   letter-spacing: 0.01em;
 }
 
@@ -343,7 +361,7 @@ a:focus-visible {
   margin-bottom: var(--half-y);
   padding-bottom: var(--half-y);
   border-bottom: 1px solid var(--shadow);
-  font-size: 1.6em;
+  font-size: clamp(1.25em, 1.1em + 2vw, 1.6em);
   line-height: 1.2;
   text-align: center;
   text-wrap: balance;
@@ -533,23 +551,62 @@ a.external::before {
   text-indent: 0;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 70rem) {
   :root {
     --shadow-x: var(--cell-x);
     --shadow-y: calc(var(--cell-y) / 2);
   }
 
   #content {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  #left, #right {
+  #main {
+    order: -1;
+    width: 100%;
+    max-width: calc(var(--measure) + var(--cell-x) * 6);
+    margin-inline: auto;
+  }
+
+  #right {
+    order: 0;
     position: static;
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  #left {
+    order: 1;
+    position: static;
+    flex: 0 0 auto;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
     gap: 0 calc(var(--cell-x) * 2);
     align-items: start;
-    margin-bottom: var(--half-y);
+    width: 100%;
+  }
+}
+
+@media (pointer: coarse) {
+  .menu a,
+  #menubar a {
+    padding-block: calc(var(--cell-y) / 4);
+  }
+}
+
+@media (max-width: 720px) {
+  html {
+    font: 400 16px/1.6 ui-monospace, 'SFMono-Regular', 'Menlo', 'Consolas', 'Liberation Mono', 'DejaVu Sans Mono', monospace;
+  }
+
+  #wrapper {
+    padding: var(--cell-y) var(--cell-x) calc(var(--cell-y) * 2);
+  }
+
+  #menubar .bar {
+    padding-inline: var(--cell-x);
   }
 }
 
