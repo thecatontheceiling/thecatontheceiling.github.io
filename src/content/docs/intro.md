@@ -35,7 +35,7 @@ I always read everything I am sent, without exception.
 
 :::tip[Leave a message]
 
-Feel free to leave a message on my [guestbook!](https://thecatontheceiling.atabook.org)
+Feel free to leave a message on my [guestbook!](/guestbook)
 
 :::
 

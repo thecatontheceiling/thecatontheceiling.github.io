@@ -9,6 +9,7 @@ const pageLinks = [
   { label: 'Home', href: '/' },
   { label: 'Blog', href: '/blog' },
   { label: 'Donate', href: '/donate' },
+  { label: 'Guestbook', href: '/guestbook' },
 ];
 
 const hitmanLinks = [

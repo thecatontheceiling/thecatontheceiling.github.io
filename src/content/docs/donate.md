@@ -60,7 +60,7 @@ If you'd like to support me and my work, here are the addresses I accept. Anythi
 
 :::tip[Thank you!]
 
-Thanks for the support. Feel free to leave a message on my [guestbook!](https://thecatontheceiling.atabook.org)
+Thanks for the support. Feel free to leave a message on my [guestbook!](/guestbook)
 
 :::
 

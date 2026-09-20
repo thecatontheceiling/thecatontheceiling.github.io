@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Guestbook" description="Sign Lyssa's guestbook.">
+  <div class="box">
+    <fieldset class="inner">
+      <legend>Guestbook</legend>
+      <iframe
+        class="guestbook-frame"
+        src="https://thecatontheceiling.atabook.org"
+        loading="lazy"
+      ></iframe>
+      <p class="guestbook-fallback">Having trouble signing? <a class="external" href="https://thecatontheceiling.atabook.org" target="_blank" rel="noopener noreferrer">Open the guestbook directly</a>.</p>
+    </fieldset>
+  </div>
+</Base>
+
+<style>
+  .guestbook-frame {
+    display: block;
+    width: 100%;
+    height: 75vh;
+    min-height: 600px;
+    border: 0;
+    background: transparent;
+  }
+  .guestbook-fallback {
+    margin-bottom: 0;
+    font-size: 0.9em;
+  }
+</style>
