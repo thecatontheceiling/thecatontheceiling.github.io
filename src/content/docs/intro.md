@@ -1,9 +1,11 @@
 ---
 title: Hey! I'm Lyssa.
-description: Personal site of Lyssa – projects, blog posts, and contact info.
+description: Personal site of Lyssa - projects, blog posts, and contact info.
 ---
 
 Welcome to my website! Here you'll find most of the projects I've worked on, as well as my blog posts.
+
+![Gray tabby cat sleeping sprawled on the belly of a giant Snorlax plush](/img/embed.jpg)
 
 ## What I do
 

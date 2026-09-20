@@ -453,6 +453,12 @@ ws-widget {
   object-fit: cover;
 }
 
+.markdown img[src="/img/embed.jpg"] {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
 .markdown table {
   display: block;
   max-width: 100%;
