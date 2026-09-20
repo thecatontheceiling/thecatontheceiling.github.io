@@ -2,6 +2,7 @@ import { defineConfig, passthroughImageService } from 'astro/config';
 import { satteri } from '@astrojs/markdown-satteri';
 import remarkAdmonitions from './src/lib/remark-admonitions.mjs';
 import remarkExternalLinks from './src/lib/remark-externallinks.mjs';
+import remarkLazyImages from './src/lib/remark-lazy-images.mjs';
 
 export default defineConfig({
   site: 'https://thecatontheceiling.github.io',
@@ -12,7 +13,7 @@ export default defineConfig({
   markdown: {
     processor: satteri({
       features: { directive: true },
-      mdastPlugins: [remarkAdmonitions, remarkExternalLinks],
+      mdastPlugins: [remarkAdmonitions, remarkExternalLinks, remarkLazyImages],
     }),
   }
 });

@@ -37,7 +37,9 @@ const toc = headings.length > 0
     <meta property="og:url" content={canonical.href} />
     <link rel="canonical" href={canonical.href} />
     <link rel="icon" href="/img/favicon.ico" />
+    <link rel="preconnect" href="https://u.widget.st" crossorigin />
     <link rel="alternate" type="application/rss+xml" title={site.title} href="/blog/rss.xml" />
+    <slot name="head" />
     <script is:inline src="https://u.widget.st/ar.js"></script>
     <style is:inline>
       html[data-eclipse='pending'] body { opacity: 0; }
@@ -58,7 +60,7 @@ const toc = headings.length > 0
     <div id="menubar">
       <nav class="bar" aria-label="Primary">
         <a class="brand" href="/">
-          <img id="logo" src={site.logo} alt="" />
+          <img id="logo" src={site.logo} alt="" fetchpriority="high" decoding="async" />
           <span>{site.title}</span>
         </a>
           {menubar.map((item) => (
@@ -120,5 +122,8 @@ const toc = headings.length > 0
       </footer>
     </div>
     <ws-widget type="cursor" iid="12168" embed="script"></ws-widget>
+    <script is:inline>
+      if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () {}); });
+    </script>
   </body>
 </html>
