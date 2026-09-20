@@ -221,6 +221,7 @@ export function initEclipse() {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let W = 0;
   let H = 0;
+  let laidW = 0;
   let bw = 0;
   let bh = 0;
   let geo = null;
@@ -238,6 +239,7 @@ export function initEclipse() {
   function layout() {
     W = window.innerWidth;
     H = window.innerHeight;
+    laidW = W;
     const q = Math.min(1, Math.max(0.5, Math.sqrt(BUDGET / Math.max(1, W * H))));
     bw = Math.max(2, Math.round((W * q) / 2));
     bh = Math.max(2, Math.round((H * q) / 2));
@@ -265,9 +267,14 @@ export function initEclipse() {
   }
 
   let timer = 0;
+
+  function maybeLayout() {
+    if (window.innerWidth === laidW) return;
+    layout();
+  }
   window.addEventListener('resize', () => {
     window.clearTimeout(timer);
-    timer = window.setTimeout(layout, 200);
+    timer = window.setTimeout(maybeLayout, 200);
   });
 
   layout();
