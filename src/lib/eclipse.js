@@ -1,6 +1,7 @@
 const TAU = Math.PI * 2;
 const REF_AREA = 2073600;
 const BUDGET = 2200000;
+const PAINT_MS = 2600 / 39;
 
 function hexRGB(hex) {
   return [parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16)];
@@ -260,7 +261,7 @@ export function initEclipse() {
     requestAnimationFrame(tick);
     if (last === 0) last = now;
     const dt = now - last;
-    if (dt < 33) return;
+    if (dt < PAINT_MS) return;
     last = now;
     frame += Math.min(100, dt) / 16.667;
     paint(Math.floor(frame) % 90, frame);
