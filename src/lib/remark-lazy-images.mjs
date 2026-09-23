@@ -1,11 +1,11 @@
 import { defineMdastPlugin } from 'satteri';
 
 function lazyify(value) {
-  return value.replace(/<img\b([^>]*?)(\/?)>/g, (match, attrs, selfClose) => {
+  return value.replace(/<img\b([^>]*?)>/g, (match, attrs) => {
     if (/\bloading\s*=/.test(attrs)) return match;
+    const selfClose = /\/\s*$/.test(attrs);
     const cleaned = attrs.replace(/\s*\/$/, '').trimEnd();
-    const slash = selfClose === '/' || /\/$/.test(attrs) ? '/' : '';
-    return `<img${cleaned}${cleaned ? ' ' : ''}loading="lazy" decoding="async"${slash}>`;
+    return `<img${cleaned}${cleaned ? ' ' : ''}loading="lazy" decoding="async"${selfClose ? '/' : ''}>`;
   });
 }
 

@@ -1,6 +1,6 @@
 const TAU = Math.PI * 2;
 const REF_AREA = 2073600;
-const BUDGET = 2200000;
+const PIXEL_BUDGET = 2200000;
 const PAINT_MS = 2600 / 39;
 
 function hexRGB(hex) {
@@ -22,6 +22,30 @@ function hash2(x, y) {
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   h ^= h >>> 16;
   return (h >>> 0) / 4294967296;
+}
+
+function clamp8(v) {
+  return v < 0 ? 0 : v > 255 ? 255 : v | 0;
+}
+
+function fieldBase(x, y, W, H, scale, bx, by) {
+  const dEdge = Math.hypot(x - W / 2, y - H / 2);
+  let v = 1 - Math.pow(dEdge / (1600 * scale), 3);
+  v = v < 0.35 ? 0.35 : v > 1 ? 1 : v;
+  const shade = (1 - v) * 0.5;
+  const grain = (hash2(bx + 11, by + 101) - 0.5) * 22;
+  return [
+    C.field[0] + (C.shadow[0] - C.field[0]) * shade + grain,
+    C.field[1] + (C.shadow[1] - C.field[1]) * shade + grain,
+    C.field[2] + (C.shadow[2] - C.field[2]) * shade + grain,
+  ];
+}
+
+function haloWeights(rim, scale) {
+  const sky = Math.exp(-rim / (14 * scale));
+  const vio = Math.exp(-rim / (120 * scale)) * Math.min(1, rim / (10 * scale)) * 0.85;
+  const plu = Math.exp(-rim / (600 * scale)) * Math.min(1, rim / (30 * scale)) * 0.7;
+  return { sky, vio, plu, total: Math.min(1, sky + vio + plu) };
 }
 
 function eclipseGeometry(w, h) {
@@ -55,24 +79,13 @@ function renderField(ctx, W, H, bw, bh, geo) {
   for (let by = 0; by < bh; by++) {
     const y = ((by + 0.5) * H) / bh;
     const dy = y - cy;
-    const dcy = y - H / 2;
     for (let bx = 0; bx < bw; bx++) {
       const x = ((bx + 0.5) * W) / bw;
       const dx = x - cx;
       const dist = Math.hypot(dx, dy);
       const rim = dist - radius;
 
-      const dEdge = Math.hypot(x - W / 2, dcy);
-      let v = 1 - Math.pow(dEdge / (1600 * scale), 3);
-      v = v < 0.35 ? 0.35 : v > 1 ? 1 : v;
-      const shade = (1 - v) * 0.5;
-      let r = C.field[0] + (C.shadow[0] - C.field[0]) * shade;
-      let g = C.field[1] + (C.shadow[1] - C.field[1]) * shade;
-      let b = C.field[2] + (C.shadow[2] - C.field[2]) * shade;
-      const grain = (hash2(bx + 11, by + 101) - 0.5) * 22;
-      r += grain;
-      g += grain;
-      b += grain;
+      let [r, g, b] = fieldBase(x, y, W, H, scale, bx, by);
 
       if (rim >= 0) {
         const theta = Math.atan2(dy, dx);
@@ -82,10 +95,7 @@ function renderField(ctx, W, H, bw, bh, geo) {
           g = C.panelHi[1] * gl;
           b = C.panelHi[2] * gl;
         } else {
-          const sky = Math.exp(-rim / (14 * scale));
-          const vio = Math.exp(-rim / (120 * scale)) * Math.min(1, rim / (10 * scale)) * 0.85;
-          const plu = Math.exp(-rim / (600 * scale)) * Math.min(1, rim / (30 * scale)) * 0.7;
-          const total = Math.min(1, sky + vio + plu);
+          const { sky, vio, total } = haloWeights(rim, scale);
           if (total > 0.003) {
             const roll = hash2(bx + 57, by + 131);
             const wSky = sky / total;
@@ -106,9 +116,9 @@ function renderField(ctx, W, H, bw, bh, geo) {
         b += (tgt[2] - b) * 0.14;
       }
 
-      data[p++] = r < 0 ? 0 : r > 255 ? 255 : r;
-      data[p++] = g < 0 ? 0 : g > 255 ? 255 : g;
-      data[p++] = b < 0 ? 0 : b > 255 ? 255 : b;
+      data[p++] = clamp8(r);
+      data[p++] = clamp8(g);
+      data[p++] = clamp8(b);
       data[p++] = 255;
     }
   }
@@ -155,10 +165,7 @@ function drawHaloScintilla(ctx, geo, W, H, bw, bh, tick) {
     const y = geo.cy + Math.sin(theta) * R;
     if (x < 0 || y < 0 || x >= W || y >= H) continue;
     const rim = rimW + depth;
-    const sky = Math.exp(-rim / (14 * scale));
-    const vio = Math.exp(-rim / (120 * scale)) * Math.min(1, rim / (10 * scale)) * 0.85;
-    const plu = Math.exp(-rim / (600 * scale)) * Math.min(1, rim / (30 * scale)) * 0.7;
-    const total = Math.min(1, sky + vio + plu);
+    const { sky, vio, total } = haloWeights(rim, scale);
     if (total <= 0.003) continue;
     const roll = hash2(i * 7 + 3, tick * 29 + 1001);
     let band;
@@ -168,19 +175,12 @@ function drawHaloScintilla(ctx, geo, W, H, bw, bh, tick) {
     else continue;
     const bx = ((x / W) * bw) | 0;
     const by = ((y / H) * bh) | 0;
-    const dEdge = Math.hypot(x - W / 2, y - H / 2);
-    let v = 1 - Math.pow(dEdge / (1600 * scale), 3);
-    v = v < 0.35 ? 0.35 : v > 1 ? 1 : v;
-    const shade = (1 - v) * 0.5;
-    const grain = (hash2(bx + 11, by + 101) - 0.5) * 22;
+    const [br, bg, bb] = fieldBase(x, y, W, H, scale, bx, by);
     const k = Math.min(1, total * 1.6);
-    const br = C.field[0] + (C.shadow[0] - C.field[0]) * shade + grain;
-    const bg = C.field[1] + (C.shadow[1] - C.field[1]) * shade + grain;
-    const bb = C.field[2] + (C.shadow[2] - C.field[2]) * shade + grain;
     const r = br + (band[0] - br) * k;
     const g = bg + (band[1] - bg) * k;
     const b = bb + (band[2] - bb) * k;
-    ctx.fillStyle = `rgb(${r < 0 ? 0 : r > 255 ? 255 : r | 0},${g < 0 ? 0 : g > 255 ? 255 : g | 0},${b < 0 ? 0 : b > 255 ? 255 : b | 0})`;
+    ctx.fillStyle = `rgb(${clamp8(r)},${clamp8(g)},${clamp8(b)})`;
     ctx.fillRect(bx, by, 1, 1);
   }
 }
@@ -222,8 +222,6 @@ export function initEclipse() {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let W = 0;
   let H = 0;
-  let laidW = 0;
-  let laidH = 0;
   let bw = 0;
   let bh = 0;
   let geo = null;
@@ -248,9 +246,7 @@ export function initEclipse() {
     const { vw, vh } = viewportSize();
     W = vw;
     H = vh;
-    laidW = vw;
-    laidH = vh;
-    const q = Math.min(1, Math.max(0.5, Math.sqrt(BUDGET / Math.max(1, W * H))));
+    const q = Math.min(1, Math.max(0.5, Math.sqrt(PIXEL_BUDGET / Math.max(1, W * H))));
     bw = Math.max(2, Math.round((W * q) / 2));
     bh = Math.max(2, Math.round((H * q) / 2));
     field.width = bw;
@@ -280,7 +276,7 @@ export function initEclipse() {
 
   function maybeLayout() {
     const { vw, vh } = viewportSize();
-    if (Math.abs(vw - laidW) < 1 && Math.abs(vh - laidH) < 1) return;
+    if (Math.abs(vw - W) < 1 && Math.abs(vh - H) < 1) return;
     layout();
   }
   function scheduleMaybeLayout() {

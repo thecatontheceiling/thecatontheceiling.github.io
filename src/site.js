@@ -2,7 +2,6 @@ export const site = {
   title: "Lyssa's schizoposting club",
   description: "Lyssa's schizoposting club",
   logo: '/img/logo.webp',
-  author: { name: 'Lyssa', title: 'Smart dumbass', url: 'https://github.com/thecatontheceiling' },
 };
 
 const pageLinks = [
@@ -17,7 +16,7 @@ const hitmanLinks = [
   { label: 'Patch Guide', href: '/hitman3patchguide' },
 ];
 
-export const menubar = [...pageLinks, { label: 'HITMAN 3 Patch', href: hitmanLinks[0].href }];
+export const menubar = [...pageLinks];
 
 const projects = [
   { label: 'MAS', href: 'https://github.com/massgravel/Microsoft-Activation-Scripts' },
@@ -30,8 +29,8 @@ const projects = [
 
 export const menus = [
   { title: 'Pages', items: pageLinks },
-  { title: 'HITMAN 3 Patch', items: hitmanLinks },
   { title: 'Projects', items: projects },
+  { title: 'HITMAN 3 Patch', items: hitmanLinks },
 ];
 
 export const tags = {
@@ -40,7 +39,9 @@ export const tags = {
 };
 
 export function resolveTag(id) {
-  return tags[id] ?? { label: id, permalink: id };
+  const tag = tags[id];
+  if (!tag) throw new Error(`Unknown blog tag: ${id}`);
+  return tag;
 }
 
 export function tagHref(id) {
@@ -48,11 +49,7 @@ export function tagHref(id) {
 }
 
 export const footer = [
-  { title: 'Navigate', items: [
-    ...pageLinks,
-    { label: 'HITMAN 3 Patch', href: hitmanLinks[0].href },
-    hitmanLinks[1],
-  ]},
+  { title: 'Navigate', items: [...menubar] },
   { title: 'Projects', items: projects },
   { title: 'Contact', items: [
     { label: 'thecatinyourceiling@duck.com', href: 'mailto:thecatinyourceiling@duck.com', icon: 'email' },

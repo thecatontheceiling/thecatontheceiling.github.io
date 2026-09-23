@@ -4,8 +4,6 @@ const IMG_CACHE = 'lyssa-img';
 const PAGES_CACHE = 'lyssa-pages';
 const THIRD_PARTY_CACHE = 'lyssa-3p';
 const KNOWN_CACHES = [SHELL_CACHE, ASTRO_CACHE, IMG_CACHE, PAGES_CACHE, THIRD_PARTY_CACHE];
-const AR_JS_MAX_AGE_MS = 24 * 60 * 60 * 1000;
-
 const SHELL = [
   '/img/logo.webp',
   '/img/favicon.ico',
@@ -41,19 +39,12 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-function isFresh(cachedDateHeader, maxAgeMs) {
-  if (!cachedDateHeader) return false;
-  const time = Date.parse(cachedDateHeader);
-  if (Number.isNaN(time)) return false;
-  return Date.now() - time < maxAgeMs;
-}
-
 async function trimCache(cacheName, maxEntries) {
+  if (maxEntries === undefined) return;
   try {
     const cache = await caches.open(cacheName);
     const keys = await cache.keys();
-    if (keys.length <= maxEntries) return;
-    for (let i = 0; i < keys.length - maxEntries; i++) {
+    for (let i = 0; i + maxEntries < keys.length; i++) {
       await cache.delete(keys[i]);
     }
   } catch {}
@@ -70,35 +61,23 @@ function cacheableSameOrigin(res) {
   return res && res.status === 200 && res.type === 'basic';
 }
 
-async function cacheFirst(request, cacheName, maxEntries) {
-  const cached = await caches.match(request);
-  if (cached) return cached;
-  const res = await fetch(request);
-  if (cacheableSameOrigin(res)) {
-    const copy = res.clone();
-    await safePut(cacheName, request, copy);
-    if (maxEntries !== undefined) await trimCache(cacheName, maxEntries);
-  }
-  return res;
+function cacheableThirdParty(res) {
+  return res && (res.status === 200 || res.status === 0);
 }
 
-async function staleWhileRevalidate(request, cacheName, maxEntries) {
+async function staleWhileRevalidate(request, cacheName, maxEntries, cacheable = cacheableSameOrigin) {
   const cached = await caches.match(request);
-  const networkPromise = fetch(request)
+  const refresh = fetch(request)
     .then(async (res) => {
-      if (cacheableSameOrigin(res)) {
-        const copy = res.clone();
-        await safePut(cacheName, request, copy);
-        if (maxEntries !== undefined) await trimCache(cacheName, maxEntries);
+      if (cacheable(res)) {
+        await safePut(cacheName, request, res.clone());
+        await trimCache(cacheName, maxEntries);
       }
       return res;
     })
     .catch(() => undefined);
-  if (cached) {
-    networkPromise.catch(() => undefined);
-    return cached;
-  }
-  const res = await networkPromise;
+  if (cached) return cached;
+  const res = await refresh;
   if (res) return res;
   throw new Error('network unavailable');
 }
@@ -119,8 +98,7 @@ async function handleNavigate(request) {
   try {
     const res = await networkFirstNoStore(request, NAV_TIMEOUT_MS);
     if (cacheableSameOrigin(res)) {
-      const copy = res.clone();
-      await safePut(PAGES_CACHE, request, copy);
+      await safePut(PAGES_CACHE, request, res.clone());
       await trimCache(PAGES_CACHE, 30);
     }
     return res;
@@ -133,35 +111,17 @@ async function handleNavigate(request) {
   }
 }
 
-async function putThirdParty(request, response, maxEntries) {
-  try {
-    const cache = await caches.open(THIRD_PARTY_CACHE);
-    await cache.put(request, response.clone());
-    await trimCache(THIRD_PARTY_CACHE, maxEntries);
-  } catch {}
-}
-
-async function handleArJs(request) {
-  const cached = await caches.match(request);
-  const networkPromise = fetch(request)
-    .then(async (res) => {
-      if (res && (res.status === 200 || res.status === 0)) await putThirdParty(request, res, 5);
-      return res;
-    })
-    .catch(() => undefined);
-  if (cached) {
-    if (!isFresh(cached.headers.get('date'), AR_JS_MAX_AGE_MS)) networkPromise.catch(() => undefined);
-    return cached;
-  }
-  const res = await networkPromise;
-  if (res) return res;
-  throw new Error('network unavailable');
+function handleArJs(request) {
+  return staleWhileRevalidate(request, THIRD_PARTY_CACHE, 5, cacheableThirdParty);
 }
 
 async function handleMinky(request) {
   try {
     const res = await fetch(request);
-    if (res && (res.status === 200 || res.status === 0)) await putThirdParty(request, res, 10);
+    if (cacheableThirdParty(res)) {
+      await safePut(THIRD_PARTY_CACHE, request, res.clone());
+      await trimCache(THIRD_PARTY_CACHE, 10);
+    }
     if (res) return res;
   } catch {}
   const cached = await caches.match(request);
@@ -188,7 +148,7 @@ self.addEventListener('fetch', (event) => {
   if (url.pathname === '/patchversion.txt') return;
 
   if (url.pathname.startsWith('/_astro/') && (url.pathname.endsWith('.css') || url.pathname.endsWith('.js'))) {
-    event.respondWith(cacheFirst(req, ASTRO_CACHE));
+    event.respondWith(staleWhileRevalidate(req, ASTRO_CACHE));
     return;
   }
 
