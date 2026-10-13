@@ -12,7 +12,7 @@ description: Installation guides, download links, and changelog for the HITMAN 3
 :::
 
 :::tip[Mirror]
-**https://zerofs.link/f/FaWB9sB/**
+**https://mocha.my/share/WR-IlPSKJsPvcEhO3USiSrUyeHQGJqlJ**
 :::
 
 Join to get support + pings for new updates: 
