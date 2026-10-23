@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import { site, menubar, menus, footer } from '../site.js';
 import { externalAttrs, normalizePath } from '../lib/links.js';
 import EclipseBackground from '../components/EclipseBackground.astro';
-import '../styles/ncurses.css';
+import ncursesUrl from '../styles/ncurses.css?url';
 
 const { title, description, headings = [] } = Astro.props;
 const pageDescription = description ?? site.description;
@@ -20,12 +20,28 @@ const toc = headings.length > 0
 ---
 
 <!doctype html>
-<html lang="en" data-eclipse="pending">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>{pageTitle}</title>
-    <meta name="color-scheme" content="dark light"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{pageTitle}</title>
+    <link rel="preconnect" href="https://u.widget.st" crossorigin />
+    <slot name="head" />
+    <script is:inline async src="https://u.widget.st/ar.js"></script>
+    <script is:inline>
+      var el = document.documentElement;
+      el.setAttribute('data-eclipse', 'pending');
+      setTimeout(function () {
+        if (el.getAttribute('data-eclipse') === 'pending') el.setAttribute('data-eclipse', 'ready');
+      }, 1500);
+    </script>
+    <link rel="stylesheet" href={ncursesUrl} />
+    <style is:inline>
+      html[data-eclipse='pending'] body { opacity: 0; }
+      body { transition: opacity 160ms ease-out; }
+      @media (prefers-reduced-motion: reduce) { body { transition: none; } }
+    </style>
+    <meta name="color-scheme" content="dark light"/>
     <meta name="description" content={pageDescription} />
     <meta name="theme-color" content="#bb90a2"/>
     <meta name="msapplication-TileColor" content="#ffffff"/>
@@ -37,22 +53,7 @@ const toc = headings.length > 0
     <meta property="og:url" content={canonical.href} />
     <link rel="canonical" href={canonical.href} />
     <link rel="icon" href="/img/favicon.ico" />
-    <link rel="preconnect" href="https://u.widget.st" crossorigin />
     <link rel="alternate" type="application/rss+xml" title={site.title} href="/blog/rss.xml" />
-    <slot name="head" />
-    <script is:inline src="https://u.widget.st/ar.js"></script>
-    <style is:inline>
-      html[data-eclipse='pending'] body { opacity: 0; }
-      body { transition: opacity 160ms ease-out; }
-      @media (prefers-reduced-motion: reduce) { body { transition: none; } }
-    </style>
-    <script is:inline>
-      setTimeout(function () {
-        var el = document.documentElement;
-        if (el.getAttribute('data-eclipse') === 'pending') el.setAttribute('data-eclipse', 'ready');
-      }, 1500);
-    </script>
-    <noscript><style>html[data-eclipse='pending'] body { opacity: 1; }</style></noscript>
   </head>
   <body>
     <EclipseBackground />
