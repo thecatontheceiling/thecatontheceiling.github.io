@@ -1,14 +1,28 @@
 ---
 import { getCollection } from 'astro:content';
-import { site, menubar, menus, footer } from '../site.js';
+import { site, menubar, menus, footer, embedLinks } from '../site.js';
 import { externalAttrs, normalizePath } from '../lib/links.js';
 import EclipseBackground from '../components/EclipseBackground.astro';
 import ncursesUrl from '../styles/ncurses.css?url';
+import { buildComponentEmbed, serializeComponentEmbed } from '../lib/discord-embed.js';
 
-const { title, description, headings = [] } = Astro.props;
+const { title, description, headings = [], subtext } = Astro.props;
 const pageDescription = description ?? site.description;
 const path = normalizePath(Astro.url.pathname);
 const canonical = new URL(path, Astro.site);
+const embedImage = { ...site.embedImage, url: new URL(site.embedImage.path, Astro.site).href };
+const embedJson = serializeComponentEmbed(
+  buildComponentEmbed({
+    title,
+    description: pageDescription,
+    url: canonical.href,
+    subtext: subtext ? `${site.title} · ${subtext}` : site.title,
+    image: { url: embedImage.url, alt: embedImage.alt },
+    buttons: embedLinks.map((link) => ({ label: link.label, url: new URL(link.href, Astro.site).href })),
+    accentColor: site.themeColor,
+  }),
+  title,
+);
 const pageTitle = title === site.title ? title : `${title} | ${site.title}`;
 const isCurrent = (href) => href === path || (href !== '/' && path.startsWith(`${href}/`));
 const recentPosts = (await getCollection('blog')).sort((a, b) => b.data.date - a.data.date).slice(0, 5);
@@ -25,6 +39,7 @@ const toc = headings.length > 0
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{pageTitle}</title>
+    <script is:inline id="discord:component-embed" type="application/json" set:html={embedJson}></script>
     <link rel="preconnect" href="https://u.widget.st" crossorigin />
     <slot name="head" />
     <script is:inline async src="https://u.widget.st/ar.js"></script>
@@ -43,10 +58,14 @@ const toc = headings.length > 0
     </style>
     <meta name="color-scheme" content="dark light"/>
     <meta name="description" content={pageDescription} />
-    <meta name="theme-color" content="#bb90a2"/>
+    <meta name="theme-color" content={site.themeColor}/>
     <meta name="msapplication-TileColor" content="#ffffff"/>
     <meta property="og:title" content={title} />
-    <meta property="og:image" content={new URL('/img/embed.jpg', Astro.site)} />
+    <meta property="og:image" content={embedImage.url} />
+    <meta property="og:image:width" content={embedImage.width} />
+    <meta property="og:image:height" content={embedImage.height} />
+    <meta property="og:image:alt" content={embedImage.alt} />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta property="og:description" content={pageDescription} />
     <meta property="og:type" content="website"/>
     <meta property="og:site_name" content="Lyssa's schizoposting club"/>

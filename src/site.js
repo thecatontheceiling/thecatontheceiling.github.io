@@ -2,6 +2,13 @@ export const site = {
   title: "Lyssa's schizoposting club",
   description: "Lyssa's schizoposting club",
   logo: '/img/logo.webp',
+  themeColor: '#bb90a2',
+  embedImage: {
+    path: '/img/embed.jpg',
+    width: 1280,
+    height: 720,
+    alt: 'Gray tabby cat sleeping on the belly of a giant Snorlax plush',
+  },
 };
 
 const pageLinks = [
@@ -17,6 +24,8 @@ const hitmanLinks = [
 ];
 
 export const menubar = [...pageLinks];
+
+export const embedLinks = pageLinks.filter((link) => link.href !== '/');
 
 const projects = [
   { label: 'MAS', href: 'https://github.com/massgravel/Microsoft-Activation-Scripts' },

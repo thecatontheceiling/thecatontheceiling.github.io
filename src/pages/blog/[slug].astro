@@ -16,6 +16,7 @@ const date = entry.data.date.toISOString().slice(0, 10);
 <Base
   title={entry.data.title}
   description={entry.data.description}
+  subtext={[date, ...entry.data.tags.map((tag) => resolveTag(tag).label)].join(' · ')}
   headings={headings.filter((h) => h.depth <= 3)}
 >
   <article class="box">
