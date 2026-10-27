@@ -1,6 +1,6 @@
 ---
 title: Hey! I'm Lyssa.
-description: Personal site of Lyssa - projects, blog posts, and contact info.
+description: My projects, blog posts, and contact info.
 ---
 
 Welcome to my website! Here you'll find most of the projects I've worked on, as well as my blog posts.
