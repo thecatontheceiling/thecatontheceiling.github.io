@@ -641,7 +641,7 @@ a.external::before {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(26ch, 1fr));
   gap: var(--half-y) calc(var(--cell-x) * 2);
-  margin: 0 0 var(--half-y);
+  margin: 0 0 calc(var(--shadow-y) + var(--half-y));
 }
 
 .markdown .donate-card {
