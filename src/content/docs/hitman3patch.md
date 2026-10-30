@@ -1,6 +1,6 @@
 ---
 title: The Definitive HITMAN 3 Patch
-description: Installation guides, download links, and changelog for the HITMAN 3 patch.
+description: Installation guide, download link, and changelog for the HITMAN 3 patch.
 ---
 
 :::danger[]
@@ -8,11 +8,11 @@ description: Installation guides, download links, and changelog for the HITMAN 3
 :::
 
 :::tip[Main download link]
-**https://pixeldrain.com/u/UQTKRLeX**
+**https://pixeldrain.com/u/tXStaVrF**
 :::
 
 :::tip[Mirror]
-**https://mocha.my/share/WR-IlPSKJsPvcEhO3USiSrUyeHQGJqlJ**
+**https://mocha.my/share/V7e5RblqvnGXZsL-aU7jnY-BEEImsm5_**
 :::
 
 Join to get support + pings for new updates: 
