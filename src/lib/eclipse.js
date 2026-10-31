@@ -83,7 +83,7 @@ function eclipseGeometry(w, h) {
   const s = Math.min(2, Math.max(0.7, Math.sqrt((w * h) / REF_AREA)));
   const x1 = -0.12 * w;
   const x2 = 1.12 * w;
-  const y0 = h * 0.46;
+  const y0 = h * 0.6;
   const dist = x2 - x1;
   const sag = dist * 0.062;
   const radius = (dist * dist) / (8 * sag) + sag * 0.5;
