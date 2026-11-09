@@ -707,6 +707,351 @@ a.external::before {
   font-style: italic;
 }
 
+.markdown .projects {
+  --dither: repeating-conic-gradient(var(--shadow) 0 25%, transparent 0 50%) 0 0 / 4px 4px;
+  --sweep: linear-gradient(100deg, var(--link) 0%, var(--accent) 50%, var(--link) 100%) 0 0 / 200% 100% repeat-x;
+  --ramp-mid: color-mix(in oklab, var(--accent) 50%, var(--link));
+  --ramp-glint: color-mix(in oklab, var(--panel-hi) 20%, var(--accent));
+  --ramp: linear-gradient(90deg, var(--link) 0 24px, var(--ramp-mid) 0 48px, var(--accent) 0 72px, var(--ramp-glint) 0 96px, var(--accent) 0 120px, var(--ramp-mid) 0 144px) 0 0 / 144px 100% repeat-x;
+  --checker: repeating-conic-gradient(#000 0 25%, transparent 0 50%) 0 0 / 8px 8px;
+  --drop-x: var(--cell-x);
+  --drop-y: var(--half-y);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(28ch, 100%), 1fr));
+  gap: var(--cell-y) calc(var(--cell-x) * 2);
+  max-width: none;
+  margin: 0 0 calc(var(--cell-y) * 1.5);
+}
+
+.markdown .projects > .project {
+  position: relative;
+  padding: 0;
+  text-indent: 0;
+}
+
+.markdown .projects > .project::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  translate: var(--drop-x) var(--drop-y);
+  background: var(--dither);
+}
+
+.markdown .project--wide {
+  grid-column: 1 / -1;
+}
+
+.project__win {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid var(--shadow);
+  background-color: var(--panel-hi);
+  transition: translate 120ms steps(2, end);
+}
+
+.project:hover .project__win,
+.project:focus-within .project__win {
+  translate: calc(var(--drop-x) / -2) calc(var(--drop-y) / -2);
+}
+
+.project:active .project__win {
+  translate: var(--drop-x) var(--drop-y);
+  transition-duration: 40ms;
+}
+
+.project:has(.project__name:focus-visible) .project__win {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+}
+
+.markdown .project__bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: var(--cell-x);
+  margin: 0;
+  padding: 0 var(--cell-x);
+  border-bottom: 1px solid var(--shadow);
+  background-color: var(--panel);
+  color: var(--link);
+}
+
+.project:hover .project__bar,
+.project:focus-within .project__bar {
+  color: var(--panel-hi);
+  transition: color 0s 200ms;
+}
+
+.project__bar > * {
+  grid-row: 1;
+  z-index: 1;
+}
+
+.project__bar > .project__fx {
+  position: relative;
+  z-index: 0;
+  grid-column: 1 / -1;
+  align-self: stretch;
+  margin-inline: calc(var(--cell-x) * -1);
+  background: var(--ramp);
+  visibility: hidden;
+}
+
+.project__fx::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  --flow-x: 12px;
+  background: var(--ramp);
+  background-position-x: var(--flow-x);
+  mask: var(--checker);
+}
+
+.project:hover .project__fx,
+.project:focus-within .project__fx {
+  visibility: visible;
+  mask-size: 8px 8px;
+  animation:
+    project-dissolve 333ms steps(1, end),
+    project-flow 2.4s steps(36) infinite;
+}
+
+.project:hover .project__fx::after,
+.project:focus-within .project__fx::after {
+  animation: project-flow 2.4s steps(36) infinite;
+}
+
+.project__bar > .project__go {
+  grid-column: 2;
+}
+
+.markdown a.project__name {
+  grid-column: 1;
+  min-width: 0;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.markdown a.project__name:hover,
+.markdown a.project__name:focus-visible {
+  background: none;
+  color: inherit;
+}
+
+.project__name::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.project__name::after {
+  content: '';
+  display: inline-block;
+  width: 1ch;
+  height: 1em;
+  margin-left: 0.25ch;
+  vertical-align: -0.15em;
+  background-color: currentColor;
+  opacity: 0;
+}
+
+.project:hover .project__name::after,
+.project:focus-within .project__name::after {
+  animation: project-blink 1s steps(1) infinite;
+}
+
+.project__go {
+  flex: none;
+  margin-left: auto;
+  transition: translate 120ms steps(2, end);
+}
+
+.project__go:not(.project__go--here) {
+  width: 0.8em;
+  height: 0.8em;
+  background-color: currentColor;
+  mask: url(/img/externallink.svg) center / contain no-repeat;
+}
+
+.project:hover .project__bar > .project__go,
+.project:focus-within .project__bar > .project__go {
+  translate: 0.2ch -0.1em;
+}
+
+.markdown .project__desc {
+  margin: 0;
+  padding: var(--half-y) var(--cell-x) 0;
+}
+
+.markdown .project__path {
+  margin: auto 0 0;
+  padding: var(--half-y) var(--cell-x) calc(var(--half-y) / 2);
+  color: var(--shadow);
+  font-size: 0.8em;
+  overflow-wrap: anywhere;
+}
+
+.markdown .project__path::before {
+  content: '$ cd ';
+  opacity: 0.6;
+}
+
+.project:hover .project__path,
+.project:focus-within .project__path {
+  color: var(--accent);
+}
+
+.markdown a.project__sub {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  margin: var(--half-y) var(--cell-x) 0;
+  padding: 0 var(--cell-x);
+  border: 1px dashed var(--shadow);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.project__sub b {
+  margin-right: 1ch;
+  color: var(--link);
+}
+
+.project__tree {
+  white-space: pre;
+  color: var(--shadow);
+}
+
+.project__sub .project__go {
+  margin-left: auto;
+  padding-left: var(--cell-x);
+}
+
+.markdown a.project__sub:hover,
+.markdown a.project__sub:focus-visible {
+  border-style: solid;
+  border-color: var(--link);
+  background-color: var(--link);
+  color: var(--panel-hi);
+}
+
+.project__sub:hover b,
+.project__sub:focus-visible b,
+.project__sub:hover .project__tree,
+.project__sub:focus-visible .project__tree {
+  color: inherit;
+}
+
+.project__win::after {
+  content: '';
+  position: absolute;
+  top: -0.8em;
+  right: -0.8em;
+  width: 1.6em;
+  height: 1.6em;
+  background: var(--sweep);
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+  scale: 0;
+  pointer-events: none;
+}
+
+.project:hover .project__win::after,
+.project:focus-within .project__win::after {
+  animation: project-twinkle 1.2s steps(6) infinite alternate;
+}
+
+.markdown .project--featured .project__win {
+  border: 2px solid var(--accent);
+}
+
+.markdown .project--featured .project__bar {
+  border-bottom-color: var(--accent);
+  background-color: var(--accent);
+  color: var(--panel-hi);
+  font-size: 1.1em;
+}
+
+@keyframes project-dissolve {
+  0% {
+    mask-image: linear-gradient(transparent, transparent);
+  }
+  20% {
+    mask-image: conic-gradient(at 4px 4px, transparent 75%, #000 0);
+  }
+  40% {
+    mask-image: repeating-conic-gradient(transparent 0 25%, #000 0 50%);
+  }
+  60% {
+    mask-image: conic-gradient(at 4px 4px, #000 50%, transparent 0 75%, #000 0);
+  }
+  80%,
+  100% {
+    mask-image: linear-gradient(#000, #000);
+  }
+}
+
+@keyframes project-flow {
+  from {
+    background-position-x: var(--flow-x, 0px);
+  }
+  to {
+    background-position-x: calc(var(--flow-x, 0px) + 144px);
+  }
+}
+
+@keyframes project-blink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes project-twinkle {
+  from {
+    scale: 0.55;
+    rotate: 0deg;
+  }
+  to {
+    scale: 1;
+    rotate: 45deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project__win,
+  .project__go,
+  .project:hover .project__bar,
+  .project:focus-within .project__bar {
+    transition: none;
+  }
+
+  .project:hover .project__fx,
+  .project:focus-within .project__fx,
+  .project:hover .project__fx::after,
+  .project:focus-within .project__fx::after,
+  .project:hover .project__win::after,
+  .project:focus-within .project__win::after {
+    animation: none;
+  }
+
+  .project:hover .project__win::after,
+  .project:focus-within .project__win::after {
+    scale: 0.8;
+  }
+
+  .project:hover .project__name::after,
+  .project:focus-within .project__name::after {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 .eclipse-bg {
   position: fixed;
   top: 0;
