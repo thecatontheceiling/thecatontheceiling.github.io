@@ -67,17 +67,29 @@ Most of the rest is either unfinished, a work in progress, or private. :)
 
 ## Contact
 
-I always read everything I am sent, without exception.
-
-* Email: [thecatinyourceiling@duck.com](mailto:thecatinyourceiling@duck.com)
-* Discord: [thecatinyourceiling](https://discord.com/users/1292181720354787421)
-* Signal: [thecatinyourceiling.38](https://signal.me/#eu/xPOwGT5i2r_AzNe7EqqVXTp5JhXmosxIk2qsg3EgvQK4k0sVOjpC64IMpOhDVZMQ)
-
-:::tip[Leave a message]
-
-Feel free to leave a message on my [guestbook!](/guestbook)
-
-:::
+<div class="contact" data-contact>
+  <p class="contact__title">Say hi</p>
+  <p class="contact__prompt">I always read everything I am sent, without exception.</p>
+  <ul class="contact__menu">
+    <li class="contact__item" data-copy="thecatinyourceiling@duck.com" data-status="Write me an email.">
+      <a class="contact__link" href="mailto:thecatinyourceiling@duck.com"><span class="contact__ico" style="--ico: url(/img/email.svg)" aria-hidden="true"></span><span class="contact__label">Email</span><span class="contact__value">thecatinyourceiling@duck.com</span></a>
+      <button class="contact__copy" type="button" aria-label="Copy email address"><span class="contact__copy-idle">Copy</span><span class="contact__copy-done">Copied</span></button>
+    </li>
+    <li class="contact__item" data-copy="thecatinyourceiling" data-status="Opens my Discord profile. Can also copy the username and add me.">
+      <a class="contact__link" href="https://discord.com/users/1292181720354787421" target="_blank" rel="noopener noreferrer"><span class="contact__ico" style="--ico: url(/img/discord.svg)" aria-hidden="true"></span><span class="contact__label">Discord</span><span class="contact__value">thecatinyourceiling</span></a>
+      <button class="contact__copy" type="button" aria-label="Copy Discord username"><span class="contact__copy-idle">Copy</span><span class="contact__copy-done">Copied</span></button>
+    </li>
+    <li class="contact__item" data-copy="thecatinyourceiling.38" data-status="Opens a chat with me in Signal. Can also copy the username and search it.">
+      <a class="contact__link" href="https://signal.me/#eu/xPOwGT5i2r_AzNe7EqqVXTp5JhXmosxIk2qsg3EgvQK4k0sVOjpC64IMpOhDVZMQ" target="_blank" rel="noopener noreferrer"><span class="contact__ico" style="--ico: url(/img/signal.svg)" aria-hidden="true"></span><span class="contact__label">Signal</span><span class="contact__value">thecatinyourceiling.38</span></a>
+      <button class="contact__copy" type="button" aria-label="Copy Signal username"><span class="contact__copy-idle">Copy</span><span class="contact__copy-done">Copied</span></button>
+    </li>
+    <li class="contact__item" data-status="Leave a message on my guestbook, right here on the site!">
+      <a class="contact__link" href="/guestbook"><span class="contact__ico contact__ico--text" aria-hidden="true">✎</span><span class="contact__label">Guestbook</span><span class="contact__value">/guestbook</span></a>
+    </li>
+  </ul>
+  <p class="contact__status" aria-hidden="true"><span class="contact__status-text">Pick a channel.</span><span class="contact__pos"></span></p>
+  <p class="sr-only" role="status" data-contact-live></p>
+</div>
 
 ---
 
