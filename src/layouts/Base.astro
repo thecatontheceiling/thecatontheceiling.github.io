@@ -31,6 +31,8 @@ const groups = [...menus.slice(0, 2), ...(recentPosts.length > 0 ? [recent] : []
 const toc = headings.length > 0
   ? { title: 'Contents', items: headings.map((h) => ({ label: h.text, href: `#${h.slug}` })) }
   : null;
+// The widget script can rewrite the entirety of the DOM so it's best to keep it off the donate page that has payment addresses.
+const widgets = !['/donate', '/hitman3patch'].includes(path);
 ---
 
 <!doctype html>
@@ -40,9 +42,8 @@ const toc = headings.length > 0
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{pageTitle}</title>
     <script is:inline id="discord:component-embed" type="application/json" set:html={embedJson}></script>
-    <link rel="preconnect" href="https://u.widget.st" crossorigin />
     <slot name="head" />
-    <script is:inline async src="https://u.widget.st/ar.js"></script>
+    {widgets && <script is:inline async src="https://u.widget.st/ar.js"></script>}
     <script is:inline>
       var el = document.documentElement;
       el.setAttribute('data-eclipse', 'pending');
@@ -141,7 +142,7 @@ const toc = headings.length > 0
         </div>
       </footer>
     </div>
-    <ws-widget type="cursor" iid="12168" embed="script"></ws-widget>
+    {widgets && <ws-widget type="cursor" iid="12168" embed="script"></ws-widget>}
     <script is:inline>
       if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () {}); });
     </script>

@@ -1,7 +1,7 @@
 import { defineMdastPlugin } from 'satteri';
 
 function lazyify(value) {
-  return value.replace(/<img\b([^>]*?)>/g, (match, attrs) => {
+  return value.replace(/<img\b((?:"[^"]*"|'[^']*'|[^'">])*)>/g, (match, attrs) => {
     if (/\bloading\s*=/.test(attrs)) return match;
     const selfClose = /\/\s*$/.test(attrs);
     const cleaned = attrs.replace(/\s*\/$/, '').trimEnd();
