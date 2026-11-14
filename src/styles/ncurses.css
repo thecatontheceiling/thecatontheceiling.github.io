@@ -841,14 +841,18 @@ a.external::before {
   inset: 0;
 }
 
-.project__name::after {
+.project__name::after,
+.melt-bar::after {
   content: '';
   display: inline-block;
   width: 1ch;
   height: 1em;
-  margin-left: 0.25ch;
   vertical-align: -0.15em;
   background-color: currentColor;
+}
+
+.project__name::after {
+  margin-left: 0.25ch;
   opacity: 0;
 }
 
@@ -1350,4 +1354,102 @@ a.external::before {
 .guestbook-fallback {
   margin-bottom: 0;
   font-size: 0.9em;
+}
+
+.melt-trigger {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--link);
+  font: inherit;
+  cursor: pointer;
+}
+
+.melt-trigger::before {
+  content: '< ';
+}
+
+.melt-trigger::after {
+  content: ' >';
+}
+
+.melt-trigger:is(:hover, :focus-visible, [data-pressed]) {
+  background-color: var(--link);
+  color: var(--panel-hi);
+  outline: none;
+}
+
+html[data-melt] > body > :is(#menubar, #wrapper) {
+  visibility: hidden;
+}
+
+.melt-stage {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.melt-slice {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  overflow: hidden;
+  contain: strict;
+}
+
+.melt-page {
+  position: absolute;
+}
+
+.melt-hollow {
+  background-color: var(--panel-hi);
+  border: 1px solid var(--shadow);
+}
+
+.melt-bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 6;
+  margin: 0;
+  padding: 0 calc(var(--cell-x) * 2);
+  border: 0;
+  background-color: var(--accent);
+  color: var(--panel-hi);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  animation: melt-bar-in 160ms steps(2, end) both;
+}
+
+.melt-bar::after {
+  margin-left: 1ch;
+  animation: project-blink 1s steps(1) infinite;
+}
+
+.melt-bar:hover {
+  background-color: var(--panel-hi);
+  color: var(--accent);
+}
+
+.melt-bar:focus-visible {
+  outline: 2px solid var(--panel-hi);
+  outline-offset: -4px;
+}
+
+@keyframes melt-bar-in {
+  from {
+    translate: 0 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .melt-bar,
+  .melt-bar::after {
+    animation: none;
+  }
 }

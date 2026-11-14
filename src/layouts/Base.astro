@@ -134,7 +134,9 @@ const widgets = !['/donate', '/hitman3patch'].includes(path);
               <h2>{col.title}</h2>
               <ul>
                 {col.items.map((item) => (
-                  <li><a href={item.href} {...externalAttrs(item.href, !item.icon)}>{item.icon && <img class="ico" src={`/img/${item.icon}.svg`} alt="" />}{item.label}</a></li>
+                  item.action === 'melt'
+                    ? <li data-melt-item hidden><button type="button" class="melt-trigger">{item.label}</button></li>
+                    : <li><a href={item.href} {...externalAttrs(item.href, !item.icon)}>{item.icon && <img class="ico" src={`/img/${item.icon}.svg`} alt="" />}{item.label}</a></li>
                 ))}
               </ul>
             </div>
@@ -145,6 +147,10 @@ const widgets = !['/donate', '/hitman3patch'].includes(path);
     {widgets && <ws-widget type="cursor" iid="12168" embed="script"></ws-widget>}
     <script is:inline>
       if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () {}); });
+    </script>
+    <script>
+      import { initMelt } from '../lib/melt.js';
+      initMelt();
     </script>
   </body>
 </html>

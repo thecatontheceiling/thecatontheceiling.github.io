@@ -68,5 +68,6 @@ export const footer = [
   { title: 'Site', items: [
     { label: 'RSS feed', href: '/blog/rss.xml' },
     { label: 'Source', href: 'https://github.com/thecatontheceiling/thecatontheceiling.github.io' },
+    { label: 'Knock it all off', action: 'melt' },
   ]},
 ];
