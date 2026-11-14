@@ -3,7 +3,7 @@ title: The Definitive HITMAN 3 Patch
 description: Installation guide, download link, and changelog for the HITMAN 3 patch.
 ---
 
-:::danger[]
+:::danger[Instructions]
 **[Guide for installing and updating the patch](/hitman3patchguide)**
 :::
 
