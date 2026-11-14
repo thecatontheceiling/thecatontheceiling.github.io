@@ -75,11 +75,11 @@ Most of the rest is either unfinished, a work in progress, or private. :)
       <a class="contact__link" href="mailto:thecatinyourceiling@duck.com"><span class="contact__ico" style="--ico: url(/img/email.svg)" aria-hidden="true"></span><span class="contact__label">Email</span><span class="contact__value">thecatinyourceiling@duck.com</span></a>
       <button class="contact__copy" type="button" aria-label="Copy email address"><span class="contact__copy-idle">Copy</span><span class="contact__copy-done">Copied</span></button>
     </li>
-    <li class="contact__item" data-copy="thecatinyourceiling" data-status="Opens my Discord profile. Can also copy the username and add me.">
+    <li class="contact__item" data-copy="thecatinyourceiling" data-status="Opens my Discord profile.">
       <a class="contact__link" href="https://discord.com/users/1292181720354787421" target="_blank" rel="noopener noreferrer"><span class="contact__ico" style="--ico: url(/img/discord.svg)" aria-hidden="true"></span><span class="contact__label">Discord</span><span class="contact__value">thecatinyourceiling</span></a>
       <button class="contact__copy" type="button" aria-label="Copy Discord username"><span class="contact__copy-idle">Copy</span><span class="contact__copy-done">Copied</span></button>
     </li>
-    <li class="contact__item" data-copy="thecatinyourceiling.38" data-status="Opens a chat with me in Signal. Can also copy the username and search it.">
+    <li class="contact__item" data-copy="thecatinyourceiling.38" data-status="Opens a chat with me in Signal.">
       <a class="contact__link" href="https://signal.me/#eu/xPOwGT5i2r_AzNe7EqqVXTp5JhXmosxIk2qsg3EgvQK4k0sVOjpC64IMpOhDVZMQ" target="_blank" rel="noopener noreferrer"><span class="contact__ico" style="--ico: url(/img/signal.svg)" aria-hidden="true"></span><span class="contact__label">Signal</span><span class="contact__value">thecatinyourceiling.38</span></a>
       <button class="contact__copy" type="button" aria-label="Copy Signal username"><span class="contact__copy-idle">Copy</span><span class="contact__copy-done">Copied</span></button>
     </li>
